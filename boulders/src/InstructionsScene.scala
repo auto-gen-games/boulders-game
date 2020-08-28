@@ -5,13 +5,13 @@ import ViewLogic.inBox
 import indigo.shared.events.MouseEvent.Click
 
 /** The instructions page, a static scene with a button to return to the game. */
-object InstructionsScene extends Scene[StartupData, Model, Unit] {
+object InstructionsScene extends Scene[StartupData, Model, ViewModel] {
   type SceneModel     = Unit
   type SceneViewModel = Unit
 
   val name: SceneName = SceneName ("instructions scene")
   val modelLens: Lens[Model, SceneModel] = Lens.fixed (())
-  val viewModelLens: Lens[Unit, SceneViewModel] = Lens.fixed (())
+  val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.fixed (())
   val eventFilters: EventFilters = EventFilters.Default.withViewModelFilter (_ => None)
   val subSystems: Set[SubSystem] = Set ()
   val bufferSize = 5

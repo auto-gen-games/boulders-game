@@ -1,9 +1,10 @@
 import indigo._
 import indigo.scenes.{Scene, SceneName}
 import scala.scalajs.js.annotation.JSExportTopLevel
+import ViewLogic._
 
 @JSExportTopLevel("IndigoGame")
-object Boulders extends IndigoGame[GameViewport, StartupData, Model, Unit] {
+object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] {
   /** The initial game model is the list of loaded level specifications and a default level layout. */
   def initialModel (startupData: StartupData): Model =
     Model (startupData.levels, PlayModel.uninitiated)
@@ -24,7 +25,7 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, Unit] {
   }
 
   /** Four scenes: start screen, levels choice, game play screen, and instructions page */
-  def scenes (bootData: GameViewport): NonEmptyList[Scene[StartupData, Model, Unit]] =
+  def scenes (bootData: GameViewport): NonEmptyList[Scene[StartupData, Model, ViewModel]] =
     NonEmptyList (StartScene, LevelsScene, PlayScene, InstructionsScene)
 
   def initialScene (bootData: GameViewport): Option[SceneName] =
@@ -35,7 +36,6 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, Unit] {
     Startup.Success (StartupData (bootData,
       assetCollection.findTextDataByName (GameAssets.levelSpecs).map (Level.decodeLevels).getOrElse (Vector.empty)))
 
-  /** We do not use a view model as yet. */
-  def initialViewModel (startupData: StartupData, model: Model): Unit =
-    ()
+  def initialViewModel (startupData: StartupData, model: Model): ViewModel =
+    ViewModel (createLevelButtons (model))
 }

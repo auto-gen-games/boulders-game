@@ -13,8 +13,9 @@ object boulders extends ScalaJSModule with MillIndigo {
   val showCursor: Boolean          = true
   val title: String                = "Boulders"
 
-  val windowStartHeight = 400
-  val windowStartWidth = 400
+  val magnification = 2
+  val windowStartHeight = 340 * magnification
+  val windowStartWidth = 352 * magnification
 
   def ivyDeps = Agg (
     ivy"io.indigoengine::indigo-json-circe::0.3.0",
@@ -29,13 +30,13 @@ object boulders extends ScalaJSModule with MillIndigo {
     }
   }
 
-  /*def runGame() = T.command {
+  def runGame() = T.command {
     T {
       compile()
       fastOpt()
-      indigorun()() // Note the double parenthesis!
+      indigoRun()() // Note the double parenthesis!
     }
-  }*/
+  }
 
   def buildGameFull() = T.command {
     T {
@@ -45,13 +46,13 @@ object boulders extends ScalaJSModule with MillIndigo {
     }
   }
 
-  /*def runGameFull() = T.command {
+  def runGameFull() = T.command {
     T {
       compile()
       fullOpt()
       indigoRunFull()() // Note the double parenthesis!
     }
-  }*/
+  }
 
   object test extends Tests {
     def ivyDeps = Agg (

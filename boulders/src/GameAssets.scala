@@ -1,5 +1,6 @@
 import Settings.{gridSquareSize, levelBoxSize}
 import indigo._
+import indigoextras.ui.ButtonAssets
 
 /** Assets: graphics, level specs (text), and font (copied from Snake demo) */
 object GameAssets {
@@ -16,6 +17,8 @@ object GameAssets {
   val wallImage = AssetName ("wallImage")
   val floorImage = AssetName ("floorImage")
   val numberBoxImage = AssetName ("numberBoxImage")
+  val numberOverImage = AssetName ("numberOverImage")
+  val numberDownImage = AssetName ("numberDownImage")
   val infoBoxImage = AssetName ("infoBoxImage")
   val backBoxImage = AssetName ("backBoxImage")
   val retryBoxImage = AssetName ("retryBoxImage")
@@ -30,6 +33,8 @@ object GameAssets {
   val wallMaterial: Material.Textured = Material.Textured (wallImage)
   val floorMaterial: Material.Textured = Material.Textured (floorImage)
   val levelNumberMaterial: Material.Textured = Material.Textured (numberBoxImage)
+  val levelNumberOverMaterial: Material.Textured = Material.Textured (numberOverImage)
+  val levelNumberDownMaterial: Material.Textured = Material.Textured (numberDownImage)
   val infoBoxMaterial: Material.Textured = Material.Textured (infoBoxImage)
   val backBoxMaterial: Material.Textured = Material.Textured (backBoxImage)
   val retryBoxMaterial: Material.Textured = Material.Textured (retryBoxImage)
@@ -43,9 +48,14 @@ object GameAssets {
   val diamond = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, diamondMaterial)
   val exit = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, exitMaterial)
   val levelNumber = Graphic (0, 0, levelBoxSize, levelBoxSize, 2, levelNumberMaterial)
+  val levelNumberOver = Graphic (0, 0, levelBoxSize, levelBoxSize, 2, levelNumberOverMaterial)
+  val levelNumberDown = Graphic (0, 0, levelBoxSize, levelBoxSize, 2, levelNumberDownMaterial)
   val infoBox = Graphic (0, 0, gridSquareSize, levelBoxSize, 2, infoBoxMaterial)
   val backBox = Graphic (0, 0, gridSquareSize, levelBoxSize, 2, backBoxMaterial)
   val retryBox = Graphic (0, 0, gridSquareSize, levelBoxSize, 2, retryBoxMaterial)
+
+  val levelButtonGraphic: ButtonAssets =
+    ButtonAssets (up = levelNumber, over = levelNumberOver, down = levelNumberDown)
 
   def assets (baseUrl: String): Set[AssetType] =
     Set (
@@ -59,6 +69,8 @@ object GameAssets {
       AssetType.Image (wallImage, AssetPath (baseUrl + "assets/wall.png")),
       AssetType.Image (floorImage, AssetPath (baseUrl + "assets/floor.png")),
       AssetType.Image (numberBoxImage, AssetPath (baseUrl + "assets/level-number.png")),
+      AssetType.Image (numberOverImage, AssetPath (baseUrl + "assets/level-number-over.png")),
+      AssetType.Image (numberDownImage, AssetPath (baseUrl + "assets/level-number-down.png")),
       AssetType.Image (infoBoxImage, AssetPath (baseUrl + "assets/info.png")),
       AssetType.Image (backBoxImage, AssetPath (baseUrl + "assets/back.png")),
       AssetType.Image (retryBoxImage, AssetPath (baseUrl + "assets/retry.png")),

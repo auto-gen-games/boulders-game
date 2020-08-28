@@ -6,13 +6,13 @@ import Settings._
 import scala.annotation.tailrec
 
 /** The opening screen, with a big title and an instruction to click. */
-object StartScene extends Scene[StartupData, Model, Unit] {
+object StartScene extends Scene[StartupData, Model, ViewModel] {
   type SceneModel     = Model
   type SceneViewModel = Unit
 
   val name: SceneName = SceneName ("start scene")
   val modelLens: Lens[Model, SceneModel] = Lens.keepLatest
-  val viewModelLens: Lens[Unit, SceneViewModel] = Lens.keepLatest
+  val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.fixed (())
   val eventFilters: EventFilters = EventFilters.Default.withViewModelFilter (_ => None)
   val subSystems: Set[SubSystem] = Set ()
 

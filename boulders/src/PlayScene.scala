@@ -5,13 +5,13 @@ import Settings.{footerStart, gridSquareSize, horizontalCenter, verticalMiddle}
 import ViewLogic._
 
 /** The main gameplay scene, a grid with a maze level and a player on it. */
-object PlayScene extends Scene[StartupData, Model, Unit] {
+object PlayScene extends Scene[StartupData, Model, ViewModel] {
   type SceneModel     = PlayModel
   type SceneViewModel = Unit
 
   val name: SceneName = SceneName ("play scene")
   val modelLens: Lens[Model, PlayModel] = Model.Lenses.playLens
-  val viewModelLens: Lens[Unit, Unit] = Lens.keepLatest
+  val viewModelLens: Lens[ViewModel, Unit] = Lens.fixed (())
   val eventFilters: EventFilters = EventFilters.Default.withViewModelFilter (_ => None)
   val subSystems: Set[SubSystem] = Set ()
 
