@@ -4,7 +4,7 @@ A puzzle platform game where you have to collect a diamond and
 leave by the exit. Push boulders around to reach your targets, but avoid
 sqaushing them or getting trapped!
 
-This is a very simple implementation using the very helpful
+This is a simple implementation using the very helpful
 [Indigo game engine](https://indigoengine.io/). It is not intended to be a
 high (or even medium) quality game for public consumption.
 Graphics were (badly) drawn using [Aseprite](https://www.aseprite.org/).
@@ -16,10 +16,10 @@ A sample set of 20 generated levels is included in the game.
 
 But it is still fun to play if you like a little puzzle :-)
 
+[Play the game here!](http://auto-gen-games.github.io/boulders-game/)
+
 Please see the
 [Indigo setup instructions](https://indigoengine.io/docs/quickstart/setup-and-configuration)
 on how to build and run the game in your web browser.
 Note that this game's build script is in
 [Mill](https://github.com/lihaoyi/mill).
-
-![Screenshot](screenshot.png "Screenshot")
