@@ -1,3 +1,5 @@
+import indigo.Point
+
 /** Constants for the display settings. */
 object Settings {
   /** The size of each grid square on the play scene. */
@@ -15,6 +17,11 @@ object Settings {
   val maxGridWidth = 10
   val maxGridHeight = 8
 
+  /** The value below can be larger than the actual number of levels.
+   * It is just used for generating level buttons in case needed.
+   */
+  val maximumLevel = 100
+
   val viewportWidth: Int =
     (gridSquareSize * maxGridWidth + leftMargin + rightMargin) * magnificationLevel
   val viewportHeight: Int =
@@ -26,9 +33,13 @@ object Settings {
   val footerStart: Int = (viewportHeight / magnificationLevel) - footerHeight + 1
 
   /** The size of the level number boxes on the levels selection scene */
-  val levelBoxSize = 64
+  val levelBoxSize = gridSquareSize
 
   /** The number of levels to fit on each row on the levels scene */
   val levelsPerRow: Int =
     (viewportWidth - (leftMargin + rightMargin) * magnificationLevel) / (levelBoxSize * magnificationLevel)
+
+  val backBoxPosition = Point (horizontalCenter - gridSquareSize * 2, footerStart + 15)
+  val infoBoxPosition = Point (horizontalCenter - gridSquareSize / 2, footerStart + 15)
+  val replayBoxPosition = Point (horizontalCenter + gridSquareSize, footerStart + 15)
 }

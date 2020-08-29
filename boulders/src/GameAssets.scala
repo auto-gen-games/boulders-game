@@ -1,86 +1,41 @@
-import Settings.{gridSquareSize, levelBoxSize}
+import Settings._
+import ViewLogic.levelButtonPosition
 import indigo._
-import indigoextras.ui.ButtonAssets
+import indigoextras.ui.{Button, ButtonAssets}
 
 /** Assets: graphics, level specs (text), and font (copied from Snake demo) */
 object GameAssets {
-  val smallFontName = AssetName ("smallFontName")
-  val playerImage = AssetName ("playerImage")
-  val playerBottomImage = AssetName ("playerBottomImage")
-  val playerTopImage = AssetName ("playerTopImage")
-  val leftPush = AssetName ("leftPushImage")
-  val rightPush = AssetName ("rightPushImage")
-  val falling = AssetName ("fallingImage")
-  val boulderImage = AssetName ("boulderImage")
-  val exitImage = AssetName ("exitImage")
-  val diamondImage = AssetName ("diamondImage")
-  val wallImage = AssetName ("wallImage")
-  val floorImage = AssetName ("floorImage")
-  val numberBoxImage = AssetName ("numberBoxImage")
-  val numberOverImage = AssetName ("numberOverImage")
-  val numberDownImage = AssetName ("numberDownImage")
-  val infoBoxImage = AssetName ("infoBoxImage")
-  val backBoxImage = AssetName ("backBoxImage")
-  val retryBoxImage = AssetName ("retryBoxImage")
-  val levelSpecs = AssetName ("levelSpecs")
-
-  val playerMaterial: Material.Textured = Material.Textured (playerImage)
-  val playerBottomMaterial: Material.Textured = Material.Textured (playerBottomImage)
-  val playerTopMaterial: Material.Textured = Material.Textured (playerTopImage)
-  val boulderMaterial: Material.Textured = Material.Textured (boulderImage)
-  val exitMaterial: Material.Textured = Material.Textured (exitImage)
-  val diamondMaterial: Material.Textured = Material.Textured (diamondImage)
-  val wallMaterial: Material.Textured = Material.Textured (wallImage)
-  val floorMaterial: Material.Textured = Material.Textured (floorImage)
-  val levelNumberMaterial: Material.Textured = Material.Textured (numberBoxImage)
-  val levelNumberOverMaterial: Material.Textured = Material.Textured (numberOverImage)
-  val levelNumberDownMaterial: Material.Textured = Material.Textured (numberDownImage)
-  val infoBoxMaterial: Material.Textured = Material.Textured (infoBoxImage)
-  val backBoxMaterial: Material.Textured = Material.Textured (backBoxImage)
-  val retryBoxMaterial: Material.Textured = Material.Textured (retryBoxImage)
-
-  val player = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, playerMaterial)
-  val playerBottom = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, playerBottomMaterial)
-  val playerTop = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, playerTopMaterial)
-  val boulder = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, boulderMaterial)
-  val wall = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, wallMaterial)
-  val floor = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, floorMaterial)
-  val diamond = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, diamondMaterial)
-  val exit = Graphic (0, 0, gridSquareSize, gridSquareSize, 2, exitMaterial)
-  val levelNumber = Graphic (0, 0, levelBoxSize, levelBoxSize, 2, levelNumberMaterial)
-  val levelNumberOver = Graphic (0, 0, levelBoxSize, levelBoxSize, 2, levelNumberOverMaterial)
-  val levelNumberDown = Graphic (0, 0, levelBoxSize, levelBoxSize, 2, levelNumberDownMaterial)
-  val infoBox = Graphic (0, 0, gridSquareSize, levelBoxSize, 2, infoBoxMaterial)
-  val backBox = Graphic (0, 0, gridSquareSize, levelBoxSize, 2, backBoxMaterial)
-  val retryBox = Graphic (0, 0, gridSquareSize, levelBoxSize, 2, retryBoxMaterial)
-
-  val levelButtonGraphic: ButtonAssets =
-    ButtonAssets (up = levelNumber, over = levelNumberOver, down = levelNumberDown)
+  val imageFiles = Set ("boulder", "boxy_font_small", "button-base", "diamond", "exit", "falling",
+    "floor", "left-push", "level-number", "level-number-down", "level-number-over", "player",
+    "player-bottom", "player-top", "right-push", "wall")
+  val buttonFiles = Set ("back-button", "info-button", "replay-button")
+  val textFiles = Set ("levels")
 
   def assets (baseUrl: String): Set[AssetType] =
-    Set (
-      AssetType.Image (smallFontName, AssetPath (baseUrl + "assets/boxy_font_small.png")),
-      AssetType.Image (playerImage, AssetPath (baseUrl + "assets/player.png")),
-      AssetType.Image (playerBottomImage, AssetPath (baseUrl + "assets/player-bottom.png")),
-      AssetType.Image (playerTopImage, AssetPath (baseUrl + "assets/player-top.png")),
-      AssetType.Image (boulderImage, AssetPath (baseUrl + "assets/boulder.png")),
-      AssetType.Image (exitImage, AssetPath (baseUrl + "assets/exit.png")),
-      AssetType.Image (diamondImage, AssetPath (baseUrl + "assets/diamond.png")),
-      AssetType.Image (wallImage, AssetPath (baseUrl + "assets/wall.png")),
-      AssetType.Image (floorImage, AssetPath (baseUrl + "assets/floor.png")),
-      AssetType.Image (numberBoxImage, AssetPath (baseUrl + "assets/level-number.png")),
-      AssetType.Image (numberOverImage, AssetPath (baseUrl + "assets/level-number-over.png")),
-      AssetType.Image (numberDownImage, AssetPath (baseUrl + "assets/level-number-down.png")),
-      AssetType.Image (infoBoxImage, AssetPath (baseUrl + "assets/info.png")),
-      AssetType.Image (backBoxImage, AssetPath (baseUrl + "assets/back.png")),
-      AssetType.Image (retryBoxImage, AssetPath (baseUrl + "assets/retry.png")),
-      AssetType.Text (levelSpecs, AssetPath (baseUrl + "assets/levels.txt"))
-    )
+    imageFiles.map (file => AssetType.Image (AssetName (file), AssetPath (baseUrl + s"assets/$file.png"))) ++
+      buttonFiles.map (file => AssetType.Image (AssetName (file), AssetPath (baseUrl + s"assets/$file.png"))) ++
+      textFiles.map (file => AssetType.Text (AssetName (file), AssetPath (baseUrl + s"assets/$file.txt")))
 
-  val fontKey: FontKey = FontKey ("boxy font")
+  val materials: Map[String, Material.Textured] =
+    imageFiles.map (image => (image, Material.Textured (AssetName (image)))).toMap
+
+  def graphic (asset: String, size: Int = gridSquareSize): Graphic =
+    Graphic (0, 0, gridSquareSize, gridSquareSize, 2, materials (asset))
+
+  val levelSpecs = AssetName ("levels")
+  val player = graphic ("player")
+  val playerBottom = graphic ("player-bottom")
+  val playerTop = graphic ("player-top")
+  val boulder = graphic ("boulder")
+  val wall = graphic ("wall")
+  val floor = graphic ("floor")
+  val diamond = graphic ("diamond")
+  val exit = graphic ("exit")
+
+  val fontKey: FontKey = FontKey ("small font")
 
   val fontInfo: FontInfo =
-    FontInfo (fontKey, Material.Textured(smallFontName), 320, 230, FontChar("?", 47, 26, 11, 12))
+    FontInfo (fontKey, Material.Textured (AssetName ("boxy_font_small")), 320, 230, FontChar("?", 47, 26, 11, 12))
       .addChar(FontChar("A", 2, 39, 10, 12))
       .addChar(FontChar("B", 14, 39, 9, 12))
       .addChar(FontChar("C", 25, 39, 10, 12))

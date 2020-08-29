@@ -1,8 +1,5 @@
-import GameAssets.levelButtonGraphic
 import indigo._
 import indigo.scenes._
-import indigo.shared.events.MouseEvent.Click
-import indigoextras.ui._
 import Model.Lenses.playLens
 import PlayModel.play
 import Settings._
@@ -14,8 +11,8 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
   type SceneViewModel = ViewModel
 
   val name: SceneName = SceneName ("levels scene")
-  val modelLens: Lens[Model, Model] = Lens.keepLatest
-  val viewModelLens: Lens[ViewModel, ViewModel] = Lens.keepLatest
+  val modelLens: Lens[Model, SceneModel] = Lens.keepLatest
+  val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.keepLatest
   val eventFilters: EventFilters = EventFilters.Default
   val subSystems: Set[SubSystem] = Set ()
 
@@ -29,8 +26,8 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateViewModel (context: FrameContext[StartupData], model: SceneModel, viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel] = {
     case FrameTick =>
-      viewModel.levelButtons.map (_.update (context.inputState.mouse)).sequence.
-        map (newButtons => viewModel.copy (levelButtons = newButtons))
+      viewModel.levelButtons.map (_.update (context.inputState.mouse)).sequence
+        .map (newButtons => viewModel.copy (levelButtons = newButtons))
     case _ =>
       Outcome (viewModel)
   }
@@ -38,7 +35,6 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
   def present (context: FrameContext[StartupData], model: SceneModel, viewModel: SceneViewModel): SceneUpdateFragment = {
     SceneUpdateFragment.empty
       .addUiLayerNodes (
-        //drawLevelBoxes (model),
         Group (viewModel.levelButtons.map (_.draw)), Group (drawNumbersOnButtons (model)),
         Text ("Select level", horizontalCenter, footerStart, 1, GameAssets.fontKey).alignCenter
       )
@@ -46,7 +42,7 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
 
   def drawNumbersOnButtons (model: SceneModel): List[Text] =
     model.levels.indices.map { n =>
-      Text (spacedNumber (n + 1), (n % levelsPerRow) * levelBoxSize + leftMargin + numberLeftPos (n + 1),
-        (n / levelsPerRow) * levelBoxSize + headerHeight + 16, 1, GameAssets.fontKey).scaleBy (3, 3)
+      Text ((n + 1).toString, (n % levelsPerRow) * levelBoxSize + leftMargin + numberLeftPos (n + 1),
+        (n / levelsPerRow) * levelBoxSize + headerHeight + 10, 1, GameAssets.fontKey).scaleBy (1, 1)
     }.toList
 }

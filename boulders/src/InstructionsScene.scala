@@ -1,36 +1,37 @@
 import indigo._
 import indigo.scenes._
 import Settings._
-import ViewLogic.inBox
-import indigo.shared.events.MouseEvent.Click
 
 /** The instructions page, a static scene with a button to return to the game. */
 object InstructionsScene extends Scene[StartupData, Model, ViewModel] {
   type SceneModel     = Unit
-  type SceneViewModel = Unit
+  type SceneViewModel = ViewModel
 
   val name: SceneName = SceneName ("instructions scene")
   val modelLens: Lens[Model, SceneModel] = Lens.fixed (())
-  val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.fixed (())
-  val eventFilters: EventFilters = EventFilters.Default.withViewModelFilter (_ => None)
+  val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.keepLatest
+  val eventFilters: EventFilters = EventFilters.Default
   val subSystems: Set[SubSystem] = Set ()
   val bufferSize = 5
 
   val backBoxPosition = Point (horizontalCenter - gridSquareSize / 2, footerStart + 15)
 
   def updateModel (context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
+    case BackButtonEvent =>
+      Outcome (model).addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
     case KeyboardEvent.KeyUp (Keys.ESCAPE) =>
       Outcome (model).addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
-    case Click (x, y) =>
-      if (inBox (x, y, backBoxPosition)) Outcome (model).addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
-      else Outcome (model)
     case _ =>
       Outcome (model)
   }
 
   def updateViewModel (context: FrameContext[StartupData], model: SceneModel,
-                       viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel] =
-    _ => Outcome (viewModel)
+                       viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel] = {
+    case FrameTick =>
+      viewModel.instructionBackButton.update (context.inputState.mouse)
+        .map (newButton => viewModel.copy (instructionBackButton = newButton))
+    case _ => Outcome (viewModel)
+  }
 
   def present (context: FrameContext[StartupData], model: SceneModel, viewModel: SceneViewModel): SceneUpdateFragment = {
     SceneUpdateFragment.empty
@@ -41,7 +42,7 @@ object InstructionsScene extends Scene[StartupData, Model, ViewModel] {
         textLine (GameAssets.boulder, "You can push boulders", 3),
         textLine (GameAssets.boulder, "unless anothers on top", 4),
         textLine (GameAssets.diamond, "Boulders squash diamond/exit", 5),
-        GameAssets.backBox.moveTo (backBoxPosition.x, backBoxPosition.y)
+        viewModel.instructionBackButton.draw
       ))
   }
 

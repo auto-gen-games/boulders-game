@@ -1,6 +1,9 @@
 import indigo._
 import indigo.scenes.{Scene, SceneName}
 import scala.scalajs.js.annotation.JSExportTopLevel
+import indigoextras.ui.Button
+import GameAssets.levelSpecs
+import Settings._
 import ViewLogic._
 
 @JSExportTopLevel("IndigoGame")
@@ -34,8 +37,13 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
   /** Load and decode the level specs on startup. */
   def setup (bootData: GameViewport, assetCollection: AssetCollection, dice: Dice): Startup[StartupErrors, StartupData] =
     Startup.Success (StartupData (bootData,
-      assetCollection.findTextDataByName (GameAssets.levelSpecs).map (Level.decodeLevels).getOrElse (Vector.empty)))
+      assetCollection.findTextDataByName (levelSpecs).map (Level.decodeLevels).getOrElse (Vector.empty)))
 
-  def initialViewModel (startupData: StartupData, model: Model): ViewModel =
-    ViewModel (createLevelButtons (model))
+  def initialViewModel (startupData: StartupData, model: Model): ViewModel = {
+    val backButton: Button = createButton ("back-button", backBoxPosition, BackButtonEvent)
+    val infoButton: Button = createButton ("info-button", infoBoxPosition, InfoButtonEvent)
+    val replayButton: Button = createButton ("replay-button", replayBoxPosition, ReplayButtonEvent)
+    val playButtons: List[Button] = List (backButton, infoButton, replayButton)
+    ViewModel (levelButtons (model.levels.size), playButtons, backButton)
+  }
 }
