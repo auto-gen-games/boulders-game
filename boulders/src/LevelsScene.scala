@@ -23,24 +23,14 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
     case LevelButtonEvent (level) =>
       Outcome (playLens.set (model, play (model.levels (level)))).
         addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
-    /*case Click (x, y) =>
-      selectLevel (x, y, model.levels.size) match {
-        case Some (level) =>
-          Outcome (playLens.set (model, play (model.levels (level)))).
-            addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
-        case None =>
-          Outcome (model)
-      }*/
     case _ =>
       Outcome (model)
   }
 
   def updateViewModel (context: FrameContext[StartupData], model: SceneModel, viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel] = {
     case FrameTick =>
-      viewModel.levelButtons.map (_.update (context.inputState.mouse)).
-        foldLeft (Outcome[List[Button]] (List.empty)) {
-          (listOutcome, buttonOutcome) => listOutcome.merge (buttonOutcome)((list, button) => list :+ button)
-        }.map (newButtons => viewModel.copy (levelButtons = newButtons))
+      viewModel.levelButtons.map (_.update (context.inputState.mouse)).sequence.
+        map (newButtons => viewModel.copy (levelButtons = newButtons))
     case _ =>
       Outcome (viewModel)
   }
@@ -59,12 +49,4 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
       Text (spacedNumber (n + 1), (n % levelsPerRow) * levelBoxSize + leftMargin + numberLeftPos (n + 1),
         (n / levelsPerRow) * levelBoxSize + headerHeight + 16, 1, GameAssets.fontKey).scaleBy (3, 3)
     }.toList
-
-  /*
-  def selectLevel (x: Int, y: Int, numberOfLevels: Int): Option[Int] =
-    (0 until numberOfLevels).find { level =>
-      x >= levelBoxLeft (level) && x < levelBoxLeft (level) + levelBoxSize &&
-        y >= levelBoxTop (level) && y < levelBoxTop (level) + levelBoxSize
-    }
-*/
 }
