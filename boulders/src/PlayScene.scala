@@ -1,6 +1,6 @@
 import indigo._
 import indigo.scenes._
-import Settings.{footerStart, horizontalCenter, verticalMiddle}
+import Settings.{footerStart, gridSquareSize, horizontalCenter, stepTime, verticalMiddle}
 import ViewLogic._
 
 /** The main gameplay scene, a grid with a maze level and a player on it. */
@@ -14,14 +14,20 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   val eventFilters: EventFilters = EventFilters.Default
   val subSystems: Set[SubSystem] = Set ()
 
-  // The footer instructions and control buttons.
+  // The footer instructions
   val instructionLine1 = "Move: Arrow keys"
 
   def updateModel (context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
-    case KeyboardEvent.KeyUp (Keys.LEFT_ARROW) => Outcome (PlayModel.move (model, -1))
-    case KeyboardEvent.KeyUp (Keys.RIGHT_ARROW) => Outcome (PlayModel.move (model, 1))
-    case KeyboardEvent.KeyUp (Keys.UP_ARROW) => Outcome (PlayModel.extend (model))
-    case KeyboardEvent.KeyUp (Keys.DOWN_ARROW) => Outcome (PlayModel.unextend (model))
+    case FrameTick if model.movement.nonEmpty =>
+      Outcome (PlayModel.updateMovement (model, context.gameTime.running))
+    case KeyboardEvent.KeyUp (Keys.LEFT_ARROW) if model.movement.isEmpty =>
+      Outcome (PlayModel.move (model, -1, context.gameTime.running))
+    case KeyboardEvent.KeyUp (Keys.RIGHT_ARROW) if model.movement.isEmpty =>
+      Outcome (PlayModel.move (model, 1, context.gameTime.running))
+    case KeyboardEvent.KeyUp (Keys.UP_ARROW) if model.movement.isEmpty =>
+      Outcome (PlayModel.extend (model, context.gameTime.running))
+    case KeyboardEvent.KeyUp (Keys.DOWN_ARROW) if model.movement.isEmpty =>
+      Outcome (PlayModel.unextend (model, context.gameTime.running))
     case BackButtonEvent => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
     case KeyboardEvent.KeyUp (Keys.ESCAPE) => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
     case InfoButtonEvent => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (InstructionsScene.name))
@@ -42,8 +48,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
    * the player has won or lost. */
   def present (context: FrameContext[StartupData], model: PlayModel, viewModel: SceneViewModel): SceneUpdateFragment = {
     val drawControls = Group (viewModel.playButtons.map (_.draw))
-    model.status match {
-      case Playing =>
+    if (model.status == Playing || model.movement.nonEmpty)
         SceneUpdateFragment.empty
           .addGameLayerNodes (
             Group (planGraphics (model.maze.leftWalls, model.maze, GameAssets.wall)),
@@ -51,36 +56,41 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
             drawRightWall (model),
             drawCeiling (model),
             place (model.maze.exit, model.maze, GameAssets.exit),
-            drawPlayerAndDiamond (model),
+            drawPlayer (model, context.gameTime.running),
+            drawDiamond (model),
             Group (planGraphics (model.boulders, model.maze, GameAssets.boulder)),
             Text (instructionLine1, horizontalCenter, footerStart, 1, GameAssets.fontKey).alignCenter,
             drawControls
           )
-      case Lost (message) =>
-        SceneUpdateFragment.empty
-          .addGameLayerNodes (
-            Text (message, horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
-            drawControls
-          )
-      case Won =>
-        SceneUpdateFragment.empty
-          .addGameLayerNodes (
-            Text ("Success!", horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
-            drawControls
-          )
+    else {
+      val message =
+        model.status match {
+          case Lost(reason) => reason
+          case _ => "Success!"
+        }
+      SceneUpdateFragment.empty
+        .addGameLayerNodes (
+          Text (message, horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
+          drawControls
+        )
     }
   }
 
-  def drawPlayerAndDiamond (model: PlayModel): Group = {
-    val drawPlayer =
-      if (!model.extended) List (place (model.position, model.maze, GameAssets.player))
-      else List (place (model.position, model.maze, GameAssets.playerTop),
-        place (model.position.moveBy (0, 1), model.maze, GameAssets.playerBottom))
-    val drawDiamond =
-      if (model.diamondTaken) None
-      else Some (place (model.maze.diamond, model.maze, GameAssets.diamond))
-    Group (drawPlayer ++ drawDiamond)
+  def drawPlayer (model: PlayModel, time: Seconds): Group = {
+    val position = if (model.movement.isEmpty) (model.position) else model.movement.head.from
+    val stepCompletion = if (model.movement.isEmpty) 0.0 else (time - model.movement.head.started).toDouble / stepTime.toDouble
+    val offsetX = if (model.movement.isEmpty) 0.0 else stepCompletion * model.movement.head.dx
+    val offsetY = if (model.movement.isEmpty) 0.0 else stepCompletion * model.movement.head.dy
+
+    if (!model.extended)
+      Group (place (position, model.maze, GameAssets.player, offsetX, offsetY))
+    else Group (place (position, model.maze, GameAssets.playerTop, offsetX, offsetY),
+      place (model.position.moveBy (0, 1), model.maze, GameAssets.playerBottom))
   }
+
+  def drawDiamond (model: PlayModel): Group =
+    if (model.diamondTaken) Group (List.empty)
+    else Group (place (model.maze.diamond, model.maze, GameAssets.diamond))
 
   /** Draw the walls on the right hand side of the level (not included in the level spec). */
   def drawRightWall (model: PlayModel): Group =

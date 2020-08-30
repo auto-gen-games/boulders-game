@@ -23,8 +23,8 @@ object ViewLogic {
       createButton ("button-base", levelButtonPosition (level), LevelButtonEvent (level))).toList
 
   /** Place the given graphic at the grid positions specified by the given matrix for the given level. */
-  def planGraphics(plan: Vector[Vector[Boolean]], maze: Level, graphic: Graphic): List[Graphic] =
-    planToGridPoints(plan).map(place(_, maze, graphic))
+  def planGraphics (plan: Vector[Vector[Boolean]], maze: Level, graphic: Renderable): List[Renderable] =
+    planToGridPoints (plan).map (place (_, maze, graphic))
 
   /** Translate the given matrix of whether something is placed at each grid point to a list of grid points. */
   def planToGridPoints (plan: Vector[Vector[Boolean]]): List[GridPoint] =
@@ -32,13 +32,13 @@ object ViewLogic {
       if (plan(x)(y)) Some (GridPoint(x, y)) else None).flatten.toList
 
   /** Translate the given grid point to a position on the screen. */
-  def gridPointToPoint (gridPoint: GridPoint, maze: Level): Point =
-    Point ((gridPoint.x + (maxGridWidth - maze.width) / 2) * gridSquareSize + leftMargin,
-      (gridPoint.y + (maxGridHeight - maze.height) / 2) * gridSquareSize + headerHeight)
+  def gridPointToPoint (gridPoint: GridPoint, maze: Level, offsetX: Double = 0.0, offsetY: Double = 0.0): Point =
+    Point (((gridPoint.x + offsetX + (maxGridWidth - maze.width) / 2) * gridSquareSize + leftMargin).toInt,
+      ((gridPoint.y + offsetY + (maxGridHeight - maze.height) / 2) * gridSquareSize + headerHeight).toInt)
 
   /** Place the given graphic at the screen position corresponding to the given grid point. */
-  def place (gridPoint: GridPoint, maze: Level, graphic: Graphic): Graphic =
-    graphic.moveTo(gridPointToPoint(gridPoint, maze))
+  def place (gridPoint: GridPoint, maze: Level, graphic: Renderable, offsetX: Double = 0.0, offsetY: Double = 0.0): Renderable =
+    graphic.moveTo (gridPointToPoint (gridPoint, maze, offsetX, offsetY))
 
   /** Add spaces between digits else they overlap when scaled. */
   def spacedNumber (n: Int): String =

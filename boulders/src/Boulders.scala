@@ -24,6 +24,7 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
 
     BootResult (config, config.viewport)
       .withAssets (GameAssets.assets (assetPath))
+      .withAnimations (GameAssets.animations)
       .withFonts (GameAssets.fontInfo)
   }
 

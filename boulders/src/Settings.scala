@@ -1,4 +1,4 @@
-import indigo.Point
+import indigo.{Millis, Point, Seconds}
 
 /** Constants for the display settings. */
 object Settings {
@@ -34,6 +34,9 @@ object Settings {
 
   /** The size of the level number boxes on the levels selection scene */
   val levelBoxSize = gridSquareSize
+
+  /** The time that each movement step by the player or a boulder should take */
+  val stepTime = Seconds (0.1)
 
   /** The number of levels to fit on each row on the levels scene */
   val levelsPerRow: Int =

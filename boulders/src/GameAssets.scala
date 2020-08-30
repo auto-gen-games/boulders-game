@@ -7,14 +7,16 @@ import indigoextras.ui.{Button, ButtonAssets}
 object GameAssets {
   val imageFiles = Set ("boulder", "boxy_font_small", "button-base", "diamond", "exit", "falling",
     "floor", "left-push", "level-number", "level-number-down", "level-number-over", "player",
-    "player-bottom", "player-top", "right-push", "wall")
+    "player-bottom", "player-sprite", "player-top", "right-push", "wall")
   val buttonFiles = Set ("back-button", "info-button", "replay-button")
   val textFiles = Set ("levels")
+  val jsonFiles = Set ("player-sprite")
 
   def assets (baseUrl: String): Set[AssetType] =
     imageFiles.map (file => AssetType.Image (AssetName (file), AssetPath (baseUrl + s"assets/$file.png"))) ++
       buttonFiles.map (file => AssetType.Image (AssetName (file), AssetPath (baseUrl + s"assets/$file.png"))) ++
-      textFiles.map (file => AssetType.Text (AssetName (file), AssetPath (baseUrl + s"assets/$file.txt")))
+      textFiles.map (file => AssetType.Text (AssetName (file), AssetPath (baseUrl + s"assets/$file.txt"))) ++
+      jsonFiles.map (file => AssetType.Text (AssetName (file), AssetPath (baseUrl + s"assets/$file.json")))
 
   val materials: Map[String, Material.Textured] =
     imageFiles.map (image => (image, Material.Textured (AssetName (image)))).toMap
@@ -31,6 +33,16 @@ object GameAssets {
   val floor = graphic ("floor")
   val diamond = graphic ("diamond")
   val exit = graphic ("exit")
+
+  val animationsKey: AnimationKey = AnimationKey ("player-animation")
+  val animations: Set[Animation] = Set (
+    Animation.apply (
+      animationsKey,
+      Material.Textured (AssetName ("player-sprite")),
+      Frame (Rectangle (0, 0, 32, 32), Millis (250)),
+      Frame (Rectangle (32, 0, 32, 32), Millis (250))
+    )
+  )
 
   val fontKey: FontKey = FontKey ("small font")
 
