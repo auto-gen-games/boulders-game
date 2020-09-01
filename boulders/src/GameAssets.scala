@@ -5,8 +5,8 @@ import indigoextras.ui.{Button, ButtonAssets}
 
 /** Assets: graphics, level specs (text), and font (copied from Snake demo) */
 object GameAssets {
-  val imageFiles = Set ("boulder", "boxy_font_small", "button-base", "diamond", "exit", "falling",
-    "floor", "left-push", "level-number", "level-number-down", "level-number-over", "player",
+  val imageFiles = Set ("boulder", "boxy_font_small", "button-base", "diamond", "exit",
+    "floor", "left-push", "level-number", "level-number-down", "level-number-over",
     "player-bottom", "player-sprite", "player-top", "right-push", "wall")
   val buttonFiles = Set ("back-button", "info-button", "replay-button")
   val textFiles = Set ("levels")
@@ -25,7 +25,10 @@ object GameAssets {
     Graphic (0, 0, gridSquareSize, gridSquareSize, 2, materials (asset))
 
   val levelSpecs = AssetName ("levels")
-  val player = graphic ("player")
+  val player = graphic ("player-sprite").withCrop (0, 0, gridSquareSize, gridSquareSize)
+  val playerRight = graphic ("player-sprite").withCrop (gridSquareSize, 0, gridSquareSize, gridSquareSize)
+  val playerFalling = graphic ("player-sprite").withCrop (gridSquareSize * 2, 0, gridSquareSize, gridSquareSize)
+  val playerLeft = playerRight.flipHorizontal (true)
   val playerBottom = graphic ("player-bottom")
   val playerTop = graphic ("player-top")
   val boulder = graphic ("boulder")
@@ -33,16 +36,6 @@ object GameAssets {
   val floor = graphic ("floor")
   val diamond = graphic ("diamond")
   val exit = graphic ("exit")
-
-  val animationsKey: AnimationKey = AnimationKey ("player-animation")
-  val animations: Set[Animation] = Set (
-    Animation.apply (
-      animationsKey,
-      Material.Textured (AssetName ("player-sprite")),
-      Frame (Rectangle (0, 0, 32, 32), Millis (250)),
-      Frame (Rectangle (32, 0, 32, 32), Millis (250))
-    )
-  )
 
   val fontKey: FontKey = FontKey ("small font")
 

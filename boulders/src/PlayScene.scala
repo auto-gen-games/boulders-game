@@ -21,13 +21,13 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   def updateModel (context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
     case FrameTick =>
       Outcome (PlayModel.updateMovement (model, context.gameTime.running))
-    case KeyboardEvent.KeyUp (Keys.LEFT_ARROW) if model.playerMoves.isEmpty =>
+    case KeyboardEvent.KeyDown (Keys.LEFT_ARROW) =>
       Outcome (PlayModel.move (model, -1, context.gameTime.running))
-    case KeyboardEvent.KeyUp (Keys.RIGHT_ARROW) if model.playerMoves.isEmpty =>
+    case KeyboardEvent.KeyDown (Keys.RIGHT_ARROW) =>
       Outcome (PlayModel.move (model, 1, context.gameTime.running))
-    case KeyboardEvent.KeyUp (Keys.UP_ARROW) if model.playerMoves.isEmpty =>
+    case KeyboardEvent.KeyDown (Keys.UP_ARROW) =>
       Outcome (PlayModel.extend (model, context.gameTime.running))
-    case KeyboardEvent.KeyUp (Keys.DOWN_ARROW) if model.playerMoves.isEmpty =>
+    case KeyboardEvent.KeyDown (Keys.DOWN_ARROW) =>
       Outcome (PlayModel.unextend (model, context.gameTime.running))
     case BackButtonEvent => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
     case KeyboardEvent.KeyUp (Keys.ESCAPE) => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
@@ -83,9 +83,16 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
     val stepCompletion = if (model.playerMoves.isEmpty) 0.0 else (time - model.playerMoves.head.started).toDouble / stepTime.toDouble
     val offsetX = if (model.playerMoves.isEmpty) 0.0 else stepCompletion * model.playerMoves.head.dx
     val offsetY = if (model.playerMoves.isEmpty) 0.0 else stepCompletion * model.playerMoves.head.dy
+    val graphic = if (model.playerMoves.isEmpty) GameAssets.player else
+      (model.playerMoves.head.dx, model.playerMoves.head.dy) match {
+        case (0, -1) => GameAssets.player
+        case (0, 1) => GameAssets.playerFalling
+        case (-1, 0) => GameAssets.playerLeft
+        case (1, 0) => GameAssets.playerRight
+      }
 
     if (!model.extended)
-      Group (place (position, model.maze, GameAssets.player, offsetX, offsetY))
+      Group (place (position, model.maze, graphic, offsetX, offsetY))
     else Group (place (position, model.maze, GameAssets.playerTop, offsetX, offsetY),
       place (model.position.moveBy (0, 1), model.maze, GameAssets.playerBottom))
   }
