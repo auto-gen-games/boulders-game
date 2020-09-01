@@ -10,7 +10,7 @@ object GameAssets {
     "player-bottom", "player-sprite", "player-top", "right-push", "wall")
   val buttonFiles = Set ("back-button", "info-button", "replay-button")
   val textFiles = Set ("levels")
-  val jsonFiles = Set ("player-sprite")
+  val jsonFiles = Set ()
 
   def assets (baseUrl: String): Set[AssetType] =
     imageFiles.map (file => AssetType.Image (AssetName (file), AssetPath (baseUrl + s"assets/$file.png"))) ++
