@@ -1,3 +1,4 @@
+import PlayModel.staticBoulders
 import indigo._
 import indigo.scenes._
 import Settings.{footerStart, gridSquareSize, horizontalCenter, stepTime, verticalMiddle}
@@ -18,15 +19,15 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   val instructionLine1 = "Move: Arrow keys"
 
   def updateModel (context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
-    case FrameTick if model.movement.nonEmpty =>
+    case FrameTick =>
       Outcome (PlayModel.updateMovement (model, context.gameTime.running))
-    case KeyboardEvent.KeyUp (Keys.LEFT_ARROW) if model.movement.isEmpty =>
+    case KeyboardEvent.KeyUp (Keys.LEFT_ARROW) if model.playerMoves.isEmpty =>
       Outcome (PlayModel.move (model, -1, context.gameTime.running))
-    case KeyboardEvent.KeyUp (Keys.RIGHT_ARROW) if model.movement.isEmpty =>
+    case KeyboardEvent.KeyUp (Keys.RIGHT_ARROW) if model.playerMoves.isEmpty =>
       Outcome (PlayModel.move (model, 1, context.gameTime.running))
-    case KeyboardEvent.KeyUp (Keys.UP_ARROW) if model.movement.isEmpty =>
+    case KeyboardEvent.KeyUp (Keys.UP_ARROW) if model.playerMoves.isEmpty =>
       Outcome (PlayModel.extend (model, context.gameTime.running))
-    case KeyboardEvent.KeyUp (Keys.DOWN_ARROW) if model.movement.isEmpty =>
+    case KeyboardEvent.KeyUp (Keys.DOWN_ARROW) if model.playerMoves.isEmpty =>
       Outcome (PlayModel.unextend (model, context.gameTime.running))
     case BackButtonEvent => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
     case KeyboardEvent.KeyUp (Keys.ESCAPE) => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
@@ -48,7 +49,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
    * the player has won or lost. */
   def present (context: FrameContext[StartupData], model: PlayModel, viewModel: SceneViewModel): SceneUpdateFragment = {
     val drawControls = Group (viewModel.playButtons.map (_.draw))
-    if (model.status == Playing || model.movement.nonEmpty)
+    if (model.status == Playing || model.playerMoves.nonEmpty || model.boulderMoves.nonEmpty)
         SceneUpdateFragment.empty
           .addGameLayerNodes (
             Group (planGraphics (model.maze.leftWalls, model.maze, GameAssets.wall)),
@@ -58,7 +59,8 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
             place (model.maze.exit, model.maze, GameAssets.exit),
             drawPlayer (model, context.gameTime.running),
             drawDiamond (model),
-            Group (planGraphics (model.boulders, model.maze, GameAssets.boulder)),
+            Group (planGraphics (staticBoulders (model), model.maze, GameAssets.boulder)),
+            drawMovingBoulder (model, context.gameTime.running),
             Text (instructionLine1, horizontalCenter, footerStart, 1, GameAssets.fontKey).alignCenter,
             drawControls
           )
@@ -77,16 +79,26 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   }
 
   def drawPlayer (model: PlayModel, time: Seconds): Group = {
-    val position = if (model.movement.isEmpty) (model.position) else model.movement.head.from
-    val stepCompletion = if (model.movement.isEmpty) 0.0 else (time - model.movement.head.started).toDouble / stepTime.toDouble
-    val offsetX = if (model.movement.isEmpty) 0.0 else stepCompletion * model.movement.head.dx
-    val offsetY = if (model.movement.isEmpty) 0.0 else stepCompletion * model.movement.head.dy
+    val position = if (model.playerMoves.isEmpty) (model.position) else model.playerMoves.head.from
+    val stepCompletion = if (model.playerMoves.isEmpty) 0.0 else (time - model.playerMoves.head.started).toDouble / stepTime.toDouble
+    val offsetX = if (model.playerMoves.isEmpty) 0.0 else stepCompletion * model.playerMoves.head.dx
+    val offsetY = if (model.playerMoves.isEmpty) 0.0 else stepCompletion * model.playerMoves.head.dy
 
     if (!model.extended)
       Group (place (position, model.maze, GameAssets.player, offsetX, offsetY))
     else Group (place (position, model.maze, GameAssets.playerTop, offsetX, offsetY),
       place (model.position.moveBy (0, 1), model.maze, GameAssets.playerBottom))
   }
+
+  def drawMovingBoulder (model: PlayModel, time: Seconds): Group =
+    if (model.boulderMoves.isEmpty) Group (List.empty)
+    else {
+      val position = model.boulderMoves.head.from
+      val stepCompletion = (time - model.boulderMoves.head.started).toDouble / stepTime.toDouble
+      val offsetX = stepCompletion * model.boulderMoves.head.dx
+      val offsetY = stepCompletion * model.boulderMoves.head.dy
+      Group (place (position, model.maze, GameAssets.boulder, offsetX, offsetY))
+    }
 
   def drawDiamond (model: PlayModel): Group =
     if (model.diamondTaken) Group (List.empty)
