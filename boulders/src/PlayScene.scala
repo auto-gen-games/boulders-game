@@ -1,7 +1,7 @@
 import PlayModel.staticBoulders
 import indigo._
 import indigo.scenes._
-import Settings.{footerStart, gridSquareSize, horizontalCenter, stepTime, verticalMiddle}
+import Settings.{footerStart, cellSize, horizontalCenter, stepTime, verticalMiddle}
 import ViewLogic._
 
 /** The main gameplay scene, a grid with a maze level and a player on it. */
@@ -21,10 +21,17 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   def updateModel (context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
     case FrameTick =>
       Outcome (PlayModel.updateMovement (model, context.gameTime.running))
+    case LeftButtonEvent =>
+      Outcome (PlayModel.move (model, -1, context.gameTime.running))
     case KeyboardEvent.KeyDown (Keys.LEFT_ARROW) =>
       Outcome (PlayModel.move (model, -1, context.gameTime.running))
+    case RightButtonEvent =>
+      Outcome (PlayModel.move (model, 1, context.gameTime.running))
     case KeyboardEvent.KeyDown (Keys.RIGHT_ARROW) =>
       Outcome (PlayModel.move (model, 1, context.gameTime.running))
+    case ExtendButtonEvent =>
+      if (!model.extended) Outcome (PlayModel.extend (model, context.gameTime.running))
+      else Outcome (PlayModel.unextend (model, context.gameTime.running))
     case KeyboardEvent.KeyDown (Keys.UP_ARROW) =>
       Outcome (PlayModel.extend (model, context.gameTime.running))
     case KeyboardEvent.KeyDown (Keys.DOWN_ARROW) =>
@@ -40,15 +47,15 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateViewModel (context: FrameContext[StartupData], gameModel: PlayModel, viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel] = {
     case FrameTick =>
-      viewModel.playButtons.map (_.update (context.inputState.mouse)).sequence
-        .map (newButtons => viewModel.copy (playButtons = newButtons))
+      viewModel.playSceneButtons.map (_.update (context.inputState.mouse)).sequence
+        .map (newButtons => viewModel.copy (playSceneButtons = newButtons))
     case _ => Outcome (viewModel)
   }
 
   /** The screen either presents the game state if play status is Playing, or a message and control buttons if
    * the player has won or lost. */
   def present (context: FrameContext[StartupData], model: PlayModel, viewModel: SceneViewModel): SceneUpdateFragment = {
-    val drawControls = Group (viewModel.playButtons.map (_.draw))
+    val drawControls = Group (viewModel.playSceneButtons.map (_.draw))
     if (model.status == Playing || model.playerMoves.nonEmpty || model.boulderMoves.nonEmpty)
         SceneUpdateFragment.empty
           .addGameLayerNodes (
@@ -61,7 +68,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
             drawDiamond (model),
             Group (planGraphics (staticBoulders (model), model.maze, GameAssets.boulder)),
             drawMovingBoulder (model, context.gameTime.running),
-            Text (instructionLine1, horizontalCenter, footerStart, 1, GameAssets.fontKey).alignCenter,
+            //Text (instructionLine1, horizontalCenter, footerStart, 1, GameAssets.fontKey).alignCenter,
             drawControls
           )
     else {

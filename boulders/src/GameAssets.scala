@@ -8,7 +8,7 @@ object GameAssets {
   val imageFiles = Set ("boulder", "boxy_font_small", "button-base", "diamond", "exit",
     "floor", "left-push", "level-number", "level-number-down", "level-number-over",
     "player-bottom", "player-sprite", "player-top", "right-push", "wall")
-  val buttonFiles = Set ("back-button", "info-button", "replay-button")
+  val buttonFiles = Set ("back-button", "control-arrows", "info-button", "replay-button")
   val textFiles = Set ("levels")
   val jsonFiles = Set ()
 
@@ -21,13 +21,13 @@ object GameAssets {
   val materials: Map[String, Material.Textured] =
     imageFiles.map (image => (image, Material.Textured (AssetName (image)))).toMap
 
-  def graphic (asset: String, size: Int = gridSquareSize): Graphic =
-    Graphic (0, 0, gridSquareSize, gridSquareSize, 2, materials (asset))
+  def graphic (asset: String, size: Int = cellSize): Graphic =
+    Graphic (0, 0, cellSize, cellSize, 2, materials (asset))
 
   val levelSpecs = AssetName ("levels")
-  val player = graphic ("player-sprite").withCrop (0, 0, gridSquareSize, gridSquareSize)
-  val playerRight = graphic ("player-sprite").withCrop (gridSquareSize, 0, gridSquareSize, gridSquareSize)
-  val playerFalling = graphic ("player-sprite").withCrop (gridSquareSize * 2, 0, gridSquareSize, gridSquareSize)
+  val player = graphic ("player-sprite").withCrop (0, 0, cellSize, cellSize)
+  val playerRight = graphic ("player-sprite").withCrop (cellSize, 0, cellSize, cellSize)
+  val playerFalling = graphic ("player-sprite").withCrop (cellSize * 2, 0, cellSize, cellSize)
   val playerLeft = playerRight.flipHorizontal (true)
   val playerBottom = graphic ("player-bottom")
   val playerTop = graphic ("player-top")

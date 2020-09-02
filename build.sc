@@ -14,7 +14,7 @@ object boulders extends ScalaJSModule with MillIndigo {
   val title: String                = "Boulders"
 
   val magnification = 2
-  val windowStartHeight = 340 * magnification
+  val windowStartHeight = 352 * magnification
   val windowStartWidth = 352 * magnification
 
   def ivyDeps = Agg (

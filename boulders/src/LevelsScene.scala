@@ -26,8 +26,8 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateViewModel (context: FrameContext[StartupData], model: SceneModel, viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel] = {
     case FrameTick =>
-      viewModel.levelButtons.map (_.update (context.inputState.mouse)).sequence
-        .map (newButtons => viewModel.copy (levelButtons = newButtons))
+      viewModel.levelSceneButtons.map (_.update (context.inputState.mouse)).sequence
+        .map (newButtons => viewModel.copy (levelSceneButtons = newButtons))
     case _ =>
       Outcome (viewModel)
   }
@@ -35,7 +35,7 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
   def present (context: FrameContext[StartupData], model: SceneModel, viewModel: SceneViewModel): SceneUpdateFragment = {
     SceneUpdateFragment.empty
       .addUiLayerNodes (
-        Group (viewModel.levelButtons.map (_.draw)), Group (drawNumbersOnButtons (model)),
+        Group (viewModel.levelSceneButtons.map (_.draw)), Group (drawNumbersOnButtons (model)),
         Text ("Select level", horizontalCenter, footerStart, 1, GameAssets.fontKey).alignCenter
       )
   }

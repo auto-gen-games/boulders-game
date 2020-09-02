@@ -5,15 +5,15 @@ import indigoextras.ui.{Button, ButtonAssets}
 /** Utility functions for placing graphics on the play scene. */
 object ViewLogic {
   /** Creates a button from the given graphics asset, at a position, and triggering an event */
-  def createButton (assetName: String, position: Point, buttonEvent: GlobalEvent, size: Int = gridSquareSize): Button = {
+  def createButton (assetName: String, position: Point, buttonEvent: GlobalEvent, row: Int = 0, size: Int = cellSize): Button = {
     val material = Material.Textured (AssetName (assetName))
     val buttonAssets = ButtonAssets (
-      up = Graphic (0, 0, size, size, 2, material).withCrop (0, 0, size, size),
-      over = Graphic (0, 0, size, size, 2, material).withCrop (size, 0, gridSquareSize, size),
-      down = Graphic (0, 0, size, size, 2, material).withCrop (0, size, size, size)
+      up = Graphic (0, 0, size, size, 2, material).withCrop (0, row * size, size, size),
+      over = Graphic (0, 0, size, size, 2, material).withCrop (size, row * size, cellSize, size),
+      down = Graphic (0, 0, size, size, 2, material).withCrop (size * 2, row * size, size, size)
     )
     Button (buttonAssets = buttonAssets,
-      bounds = Rectangle (position.x, position.y, gridSquareSize, gridSquareSize),
+      bounds = Rectangle (position.x, position.y, cellSize, cellSize),
       depth = Depth (2)).
       withUpAction { List (buttonEvent) }
   }
@@ -33,8 +33,8 @@ object ViewLogic {
 
   /** Translate the given grid point to a position on the screen. */
   def gridPointToPoint (gridPoint: GridPoint, maze: Level, offsetX: Double = 0.0, offsetY: Double = 0.0): Point =
-    Point (((gridPoint.x + offsetX + (maxGridWidth - maze.width) / 2) * gridSquareSize + leftMargin).toInt,
-      ((gridPoint.y + offsetY + (maxGridHeight - maze.height) / 2) * gridSquareSize + headerHeight).toInt)
+    Point (((gridPoint.x + offsetX + (maxGridWidth - maze.width) / 2) * cellSize + leftMargin).toInt,
+      ((gridPoint.y + offsetY + (maxGridHeight - maze.height) / 2) * cellSize + headerHeight).toInt)
 
   /** Place the given graphic at the screen position corresponding to the given grid point. */
   def place (gridPoint: GridPoint, maze: Level, graphic: Renderable, offsetX: Double = 0.0, offsetY: Double = 0.0): Renderable =

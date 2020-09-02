@@ -3,46 +3,45 @@ import indigo.{Millis, Point, Seconds}
 /** Constants for the display settings. */
 object Settings {
   /** The size of each grid square on the play scene. */
-  val gridSquareSize = 32
+  val cellSize = 32
+  val halfSize = cellSize / 2
 
   // Margins around the play area, where the footer is used for instructions and controls
-  val leftMargin: Int = 16
-  val rightMargin: Int = 16
-  val headerHeight: Int = 32
-  val footerHeight: Int = gridSquareSize + 20
-
-  val magnificationLevel: Int = 2
+  val leftMargin: Int = halfSize
+  val rightMargin: Int = halfSize
+  val headerHeight: Int = cellSize + halfSize
+  val footerHeight: Int = cellSize + halfSize
 
   // The maximum grid size for levels determines the viewport size
   val maxGridWidth = 10
   val maxGridHeight = 8
 
-  /** The value below can be larger than the actual number of levels.
-   * It is just used for generating level buttons in case needed.
-   */
-  val maximumLevel = 100
-
-  val viewportWidth: Int =
-    (gridSquareSize * maxGridWidth + leftMargin + rightMargin) * magnificationLevel
-  val viewportHeight: Int =
-    (gridSquareSize * maxGridHeight + footerHeight + headerHeight) * magnificationLevel
+  val areaWidth: Int = cellSize * maxGridWidth + leftMargin + rightMargin
+  val areaHeight: Int = cellSize * maxGridHeight + footerHeight + headerHeight
 
   // Useful points on the screen
-  val horizontalCenter: Int = (viewportWidth / magnificationLevel) / 2
-  val verticalMiddle: Int = (viewportHeight / magnificationLevel) / 2
-  val footerStart: Int = (viewportHeight / magnificationLevel) - footerHeight + 1
+  val horizontalCenter: Int = areaWidth / 2
+  val verticalMiddle: Int = areaHeight / 2
+  val rightStart: Int = areaWidth - rightMargin
+  val footerStart: Int = areaHeight - footerHeight + 1
 
   /** The size of the level number boxes on the levels selection scene */
-  val levelBoxSize = gridSquareSize
+  val levelBoxSize = cellSize
 
   /** The time that each movement step by the player or a boulder should take */
   val stepTime = Seconds (0.1)
 
   /** The number of levels to fit on each row on the levels scene */
-  val levelsPerRow: Int =
-    (viewportWidth - (leftMargin + rightMargin) * magnificationLevel) / (levelBoxSize * magnificationLevel)
+  val levelsPerRow: Int = (areaWidth - leftMargin - rightMargin) / levelBoxSize
 
-  val backBoxPosition = Point (horizontalCenter - gridSquareSize * 2, footerStart + 15)
-  val infoBoxPosition = Point (horizontalCenter - gridSquareSize / 2, footerStart + 15)
-  val replayBoxPosition = Point (horizontalCenter + gridSquareSize, footerStart + 15)
+  val backBoxPosition = Point (leftMargin, halfSize)
+  val infoBoxPosition = Point (horizontalCenter - cellSize / 2, halfSize)
+  val replayBoxPosition = Point (rightStart - cellSize, halfSize)
+  val leftControlPosition = Point (horizontalCenter - cellSize * 2, footerStart)
+  val extendControlPosition = Point (horizontalCenter - cellSize / 2, footerStart)
+  val rightControlPosition = Point (horizontalCenter + cellSize, footerStart)
+
+  val magnificationLevel: Int = 2
+  val viewportWidth: Int = areaWidth * magnificationLevel
+  val viewportHeight: Int = areaHeight * magnificationLevel
 }

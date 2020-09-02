@@ -40,10 +40,14 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
       assetCollection.findTextDataByName (levelSpecs).map (Level.decodeLevels).getOrElse (Vector.empty)))
 
   def initialViewModel (startupData: StartupData, model: Model): ViewModel = {
+    val leftButton: Button = createButton ("control-arrows", leftControlPosition, LeftButtonEvent, row = 0)
+    val extendButton: Button = createButton ("control-arrows", extendControlPosition, ExtendButtonEvent, row = 1)
+    val rightButton: Button = createButton ("control-arrows", rightControlPosition, RightButtonEvent, row = 2)
     val backButton: Button = createButton ("back-button", backBoxPosition, BackButtonEvent)
     val infoButton: Button = createButton ("info-button", infoBoxPosition, InfoButtonEvent)
     val replayButton: Button = createButton ("replay-button", replayBoxPosition, ReplayButtonEvent)
-    val playButtons: List[Button] = List (backButton, infoButton, replayButton)
-    ViewModel (levelButtons (model.levels.size), playButtons, backButton)
+    val playSceneButtons: List[Button] = List (leftButton, extendButton, rightButton, backButton, infoButton, replayButton)
+
+    ViewModel (levelButtons (model.levels.size), playSceneButtons, backButton)
   }
 }

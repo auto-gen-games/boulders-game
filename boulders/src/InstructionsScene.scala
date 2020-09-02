@@ -14,7 +14,7 @@ object InstructionsScene extends Scene[StartupData, Model, ViewModel] {
   val subSystems: Set[SubSystem] = Set ()
   val bufferSize = 5
 
-  val backBoxPosition = Point (horizontalCenter - gridSquareSize / 2, footerStart + 15)
+  val backBoxPosition = Point (horizontalCenter - cellSize / 2, footerStart + 15)
 
   def updateModel (context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case BackButtonEvent =>
@@ -47,7 +47,7 @@ object InstructionsScene extends Scene[StartupData, Model, ViewModel] {
   }
 
   def textLine (image: Graphic, text: String, lineNumber: Int): Group =
-    Group (image.moveTo (leftMargin, headerHeight + (gridSquareSize + bufferSize) * lineNumber),
-      Text (text, leftMargin + gridSquareSize + bufferSize,
-        headerHeight + (gridSquareSize + bufferSize) * lineNumber, 1, GameAssets.fontKey))
+    Group (image.moveTo (leftMargin, headerHeight + (cellSize + bufferSize) * lineNumber),
+      Text (text, leftMargin + cellSize + bufferSize,
+        headerHeight + (cellSize + bufferSize) * lineNumber, 1, GameAssets.fontKey))
 }
