@@ -1,6 +1,7 @@
 import indigo.GlobalEvent
 
 case class LevelButtonEvent (level: Int) extends GlobalEvent
+case object TutorialButtonEvent extends GlobalEvent
 case object LeftButtonEvent extends GlobalEvent
 case object ExtendButtonEvent extends GlobalEvent
 case object RightButtonEvent extends GlobalEvent

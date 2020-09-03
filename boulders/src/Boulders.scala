@@ -1,8 +1,9 @@
 import indigo._
 import indigo.scenes.{Scene, SceneName}
+
 import scala.scalajs.js.annotation.JSExportTopLevel
 import indigoextras.ui.Button
-import GameAssets.levelSpecs
+import GameAssets.{levelSpecs, tutorialSpec}
 import Settings._
 import ViewLogic._
 
@@ -10,7 +11,7 @@ import ViewLogic._
 object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] {
   /** The initial game model is the list of loaded level specifications and a default level layout. */
   def initialModel (startupData: StartupData): Model =
-    Model (startupData.levels, PlayModel.uninitiated)
+    Model (startupData.tutorial, startupData.levels, PlayModel.uninitiated)
 
   /** Copied from the Snake demo, loading assets and the viewport. */
   def boot (flags: Map[String, String]): BootResult[GameViewport] = {
@@ -36,7 +37,7 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
 
   /** Load and decode the level specs on startup. */
   def setup (bootData: GameViewport, assetCollection: AssetCollection, dice: Dice): Startup[StartupErrors, StartupData] =
-    Startup.Success (StartupData (bootData,
+    Startup.Success (StartupData (bootData, assetCollection.findTextDataByName (tutorialSpec).map (Level.levelFromCode).getOrElse (Level.uninitiated),
       assetCollection.findTextDataByName (levelSpecs).map (Level.decodeLevels).getOrElse (Vector.empty)))
 
   def initialViewModel (startupData: StartupData, model: Model): ViewModel = {
@@ -46,7 +47,7 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
     val backButton: Button = createButton ("back-button", backBoxPosition, BackButtonEvent)
     val infoButton: Button = createButton ("info-button", infoBoxPosition, InfoButtonEvent)
     val replayButton: Button = createButton ("replay-button", replayBoxPosition, ReplayButtonEvent)
-    val playSceneButtons: List[Button] = List (leftButton, extendButton, rightButton, backButton, infoButton, replayButton)
+    val playSceneButtons: List[Button] = List (leftButton, extendButton, rightButton, backButton, replayButton)
 
     ViewModel (levelButtons (model.levels.size), playSceneButtons, backButton)
   }

@@ -1,3 +1,4 @@
+import indigo.shared.datatypes.Rectangle
 import indigo.{Millis, Point, Seconds}
 
 /** Constants for the display settings. */
@@ -34,12 +35,14 @@ object Settings {
   /** The number of levels to fit on each row on the levels scene */
   val levelsPerRow: Int = (areaWidth - leftMargin - rightMargin) / levelBoxSize
 
-  val backBoxPosition = Point (leftMargin, halfSize)
+  val backBoxPosition = Point (0, halfSize)
   val infoBoxPosition = Point (horizontalCenter - cellSize / 2, halfSize)
-  val replayBoxPosition = Point (rightStart - cellSize, halfSize)
+  val replayBoxPosition = Point (areaWidth - cellSize, halfSize)
   val leftControlPosition = Point (horizontalCenter - cellSize * 2, footerStart)
   val extendControlPosition = Point (horizontalCenter - cellSize / 2, footerStart)
   val rightControlPosition = Point (horizontalCenter + cellSize, footerStart)
+  val tutorialLevelPosition = Point (leftMargin, headerHeight)
+  val tutorialGuideBoxPosition = Point (cellSize + halfSize, halfSize)
 
   val magnificationLevel: Int = 2
   val viewportWidth: Int = areaWidth * magnificationLevel

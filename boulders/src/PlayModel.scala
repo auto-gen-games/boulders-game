@@ -16,7 +16,8 @@ case class Movement (from: GridPoint, dx: Int, dy: Int, started: Seconds)
  * whether the player is extended upwards, whether the diamond has been collected, and the status of play. */
 final case class PlayModel (maze: Level, position: GridPoint, boulders: Vector[Vector[Boolean]],
                             extended: Boolean, diamondTaken: Boolean, status: PlayStatus,
-                            playerMoves: Vector[Movement], boulderMoves: Vector[Movement])
+                            playerMoves: Vector[Movement], boulderMoves: Vector[Movement],
+                            tutorial: Boolean = false)
 
 object PlayModel {
   /** The default play model is initialised from the default level. */

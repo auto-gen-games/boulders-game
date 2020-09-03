@@ -17,6 +17,9 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
   val subSystems: Set[SubSystem] = Set ()
 
   def updateModel (context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
+    case TutorialButtonEvent =>
+      Outcome (playLens.set (model, play (model.tutorial))).
+        addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
     case LevelButtonEvent (level) =>
       Outcome (playLens.set (model, play (model.levels (level)))).
         addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
@@ -36,13 +39,15 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
     SceneUpdateFragment.empty
       .addUiLayerNodes (
         Group (viewModel.levelSceneButtons.map (_.draw)), Group (drawNumbersOnButtons (model)),
+        Text ("Tutorial", tutorialLevelPosition.x + cellSize + 12, tutorialLevelPosition.y + 10, 1, GameAssets.fontKey),
         Text ("Select level", horizontalCenter, footerStart, 1, GameAssets.fontKey).alignCenter
       )
   }
 
   def drawNumbersOnButtons (model: SceneModel): List[Text] =
     model.levels.indices.map { n =>
-      Text ((n + 1).toString, (n % levelsPerRow) * levelBoxSize + leftMargin + numberLeftPos (n + 1),
-        (n / levelsPerRow) * levelBoxSize + headerHeight + 10, 1, GameAssets.fontKey).scaleBy (1, 1)
-    }.toList
+      val position = levelNumberPosition (n)
+      Text ((n + 1).toString, position.x, position.y, 1, GameAssets.fontKey)
+    }.toList :+
+      Text ("T", tutorialLevelPosition.x + 12, tutorialLevelPosition.y + 10, 1, GameAssets.fontKey)
 }

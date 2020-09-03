@@ -20,7 +20,8 @@ object ViewLogic {
 
   def levelButtons (numberOfLevels: Int): List[Button] =
     (0 until numberOfLevels).map (level =>
-      createButton ("button-base", levelButtonPosition (level), LevelButtonEvent (level))).toList
+      createButton ("button-base", levelButtonPosition (level), LevelButtonEvent (level))).toList :+
+      createButton ("button-base", tutorialLevelPosition, TutorialButtonEvent)
 
   /** Place the given graphic at the grid positions specified by the given matrix for the given level. */
   def planGraphics (plan: Vector[Vector[Boolean]], maze: Level, graphic: Renderable): List[Renderable] =
@@ -51,5 +52,10 @@ object ViewLogic {
   /** Determine level button, where level numbering starts from 0 */
   def levelButtonPosition (level: Int): Point =
     Point ((level % levelsPerRow) * levelBoxSize + leftMargin,
-      (level / levelsPerRow) * levelBoxSize + headerHeight)
+      (level / levelsPerRow) * levelBoxSize + headerHeight + cellSize + halfSize)
+
+  def levelNumberPosition (level: Int): Point = {
+    val box = levelButtonPosition (level)
+    Point (box.x + numberLeftPos (level + 1), box.y + 10)
+  }
 }

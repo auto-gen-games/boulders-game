@@ -6,10 +6,10 @@ import indigoextras.ui.{Button, ButtonAssets}
 /** Assets: graphics, level specs (text), and font (copied from Snake demo) */
 object GameAssets {
   val imageFiles = Set ("boulder", "boxy_font_small", "button-base", "diamond", "exit",
-    "floor", "left-push", "level-number", "level-number-down", "level-number-over",
-    "player-bottom", "player-sprite", "player-top", "right-push", "wall")
+    "floor", "left-push",
+    "player-bottom", "player-sprite", "player-top", "right-push", "tutorial-box", "wall")
   val buttonFiles = Set ("back-button", "control-arrows", "info-button", "replay-button")
-  val textFiles = Set ("levels")
+  val textFiles = Set ("levels", "tutorial-level")
   val jsonFiles = Set ()
 
   def assets (baseUrl: String): Set[AssetType] =
@@ -21,10 +21,11 @@ object GameAssets {
   val materials: Map[String, Material.Textured] =
     imageFiles.map (image => (image, Material.Textured (AssetName (image)))).toMap
 
-  def graphic (asset: String, size: Int = cellSize): Graphic =
-    Graphic (0, 0, cellSize, cellSize, 2, materials (asset))
+  def graphic (asset: String, width: Int = cellSize, height: Int = cellSize): Graphic =
+    Graphic (0, 0, width, height, 2, materials (asset))
 
   val levelSpecs = AssetName ("levels")
+  val tutorialSpec = AssetName ("tutorial-level")
   val player = graphic ("player-sprite").withCrop (0, 0, cellSize, cellSize)
   val playerRight = graphic ("player-sprite").withCrop (cellSize, 0, cellSize, cellSize)
   val playerFalling = graphic ("player-sprite").withCrop (cellSize * 2, 0, cellSize, cellSize)
@@ -36,6 +37,7 @@ object GameAssets {
   val floor = graphic ("floor")
   val diamond = graphic ("diamond")
   val exit = graphic ("exit")
+  val tutorialBox = graphic ("tutorial-box", 256, 64)
 
   val fontKey: FontKey = FontKey ("small font")
 

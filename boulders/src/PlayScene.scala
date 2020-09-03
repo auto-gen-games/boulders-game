@@ -1,7 +1,7 @@
 import PlayModel.staticBoulders
 import indigo._
 import indigo.scenes._
-import Settings.{footerStart, cellSize, horizontalCenter, stepTime, verticalMiddle}
+import Settings.{cellSize, footerStart, horizontalCenter, stepTime, tutorialGuideBoxPosition, verticalMiddle}
 import ViewLogic._
 
 /** The main gameplay scene, a grid with a maze level and a player on it. */
@@ -16,7 +16,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   val subSystems: Set[SubSystem] = Set ()
 
   // The footer instructions
-  val instructionLine1 = "Move: Arrow keys"
+  val instructionLine1 = "Move: Arrow keys / buttons above"
 
   def updateModel (context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
     case FrameTick =>
@@ -68,8 +68,9 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
             drawDiamond (model),
             Group (planGraphics (staticBoulders (model), model.maze, GameAssets.boulder)),
             drawMovingBoulder (model, context.gameTime.running),
-            //Text (instructionLine1, horizontalCenter, footerStart, 1, GameAssets.fontKey).alignCenter,
-            drawControls
+            Text (instructionLine1, horizontalCenter, footerStart + cellSize, 1, GameAssets.fontKey).alignCenter,
+            drawControls,
+            GameAssets.tutorialBox.moveTo (tutorialGuideBoxPosition)
           )
     else {
       val message =
