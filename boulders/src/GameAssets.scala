@@ -1,15 +1,13 @@
 import Settings._
-import ViewLogic.levelButtonPosition
 import indigo._
-import indigoextras.ui.{Button, ButtonAssets}
 
 /** Assets: graphics, level specs (text), and font (copied from Snake demo) */
 object GameAssets {
   val imageFiles = Set ("boulder", "boxy_font_small", "button-base", "diamond", "exit",
-    "floor", "left-push",
+    "floor", "highlight", "left-push",
     "player-bottom", "player-sprite", "player-top", "right-push", "tutorial-box", "wall")
   val buttonFiles = Set ("back-button", "control-arrows", "info-button", "replay-button")
-  val textFiles = Set ("levels", "tutorial-level")
+  val textFiles = Set ("levels", "tutorial-level", "tutorial-guide")
   val jsonFiles = Set ()
 
   def assets (baseUrl: String): Set[AssetType] =
@@ -26,6 +24,8 @@ object GameAssets {
 
   val levelSpecs = AssetName ("levels")
   val tutorialSpec = AssetName ("tutorial-level")
+  val tutorialGuide = AssetName ("tutorial-guide")
+
   val player = graphic ("player-sprite").withCrop (0, 0, cellSize, cellSize)
   val playerRight = graphic ("player-sprite").withCrop (cellSize, 0, cellSize, cellSize)
   val playerFalling = graphic ("player-sprite").withCrop (cellSize * 2, 0, cellSize, cellSize)
@@ -38,6 +38,7 @@ object GameAssets {
   val diamond = graphic ("diamond")
   val exit = graphic ("exit")
   val tutorialBox = graphic ("tutorial-box", 256, 64)
+  val highlight = graphic ("highlight").withCrop (0, 0, cellSize, cellSize)
 
   val fontKey: FontKey = FontKey ("small font")
 

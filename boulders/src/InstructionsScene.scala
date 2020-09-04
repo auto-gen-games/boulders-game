@@ -27,9 +27,9 @@ object InstructionsScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateViewModel (context: FrameContext[StartupData], model: SceneModel,
                        viewModel: SceneViewModel): GlobalEvent => Outcome[SceneViewModel] = {
-    case FrameTick =>
+/*    case FrameTick =>
       viewModel.instructionBackButton.update (context.inputState.mouse)
-        .map (newButton => viewModel.copy (instructionBackButton = newButton))
+        .map (newButton => viewModel.copy (instructionBackButton = newButton))*/
     case _ => Outcome (viewModel)
   }
 
@@ -42,7 +42,7 @@ object InstructionsScene extends Scene[StartupData, Model, ViewModel] {
         textLine (GameAssets.boulder, "You can push boulders", 3),
         textLine (GameAssets.boulder, "unless anothers on top", 4),
         textLine (GameAssets.diamond, "Boulders squash diamond/exit", 5),
-        viewModel.instructionBackButton.draw
+        //viewModel.instructionBackButton.draw
       ))
   }
 

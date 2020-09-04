@@ -1,8 +1,8 @@
-import PlayModel.staticBoulders
-import indigo._
-import indigo.scenes._
+import PlayModel._
 import Settings.{cellSize, footerStart, horizontalCenter, stepTime, tutorialGuideBoxPosition, verticalMiddle}
 import ViewLogic._
+import indigo._
+import indigo.scenes._
 
 /** The main gameplay scene, a grid with a maze level and a player on it. */
 object PlayScene extends Scene[StartupData, Model, ViewModel] {
@@ -20,28 +20,32 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateModel (context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
     case FrameTick =>
-      Outcome (PlayModel.updateMovement (model, context.gameTime.running))
-    case LeftButtonEvent =>
-      Outcome (PlayModel.move (model, -1, context.gameTime.running))
-    case KeyboardEvent.KeyDown (Keys.LEFT_ARROW) =>
-      Outcome (PlayModel.move (model, -1, context.gameTime.running))
-    case RightButtonEvent =>
-      Outcome (PlayModel.move (model, 1, context.gameTime.running))
-    case KeyboardEvent.KeyDown (Keys.RIGHT_ARROW) =>
-      Outcome (PlayModel.move (model, 1, context.gameTime.running))
-    case ExtendButtonEvent =>
-      if (!model.extended) Outcome (PlayModel.extend (model, context.gameTime.running))
-      else Outcome (PlayModel.unextend (model, context.gameTime.running))
-    case KeyboardEvent.KeyDown (Keys.UP_ARROW) =>
-      Outcome (PlayModel.extend (model, context.gameTime.running))
-    case KeyboardEvent.KeyDown (Keys.DOWN_ARROW) =>
-      Outcome (PlayModel.unextend (model, context.gameTime.running))
-    case BackButtonEvent => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
-    case KeyboardEvent.KeyUp (Keys.ESCAPE) => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
-    case InfoButtonEvent => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (InstructionsScene.name))
-    case KeyboardEvent.KeyUp (Keys.KEY_I) => Outcome (model).addGlobalEvents (SceneEvent.JumpTo (InstructionsScene.name))
-    case ReplayButtonEvent => Outcome (PlayModel.play (model.maze))
-    case KeyboardEvent.KeyUp (Keys.KEY_R) => Outcome (PlayModel.play (model.maze))
+      Outcome (updateMovement (model, context.gameTime.running))
+    case KeyboardEvent.KeyUp (Keys.SPACE) if enabled (model).contains (SpaceContinueEvent) =>
+      Outcome (stepTutorial (model))
+    case LeftButtonEvent if enabled (model).contains (LeftButtonEvent) =>
+      Outcome (stepTutorial (move (model, -1, context.gameTime.running)))
+    case KeyboardEvent.KeyDown (Keys.LEFT_ARROW) if enabled (model).contains (LeftButtonEvent) =>
+      Outcome (stepTutorial (move (model, -1, context.gameTime.running)))
+    case RightButtonEvent if enabled (model).contains (RightButtonEvent) =>
+      Outcome (stepTutorial (move (model, 1, context.gameTime.running)))
+    case KeyboardEvent.KeyDown (Keys.RIGHT_ARROW) if enabled (model).contains (RightButtonEvent) =>
+      Outcome (stepTutorial (move (model, 1, context.gameTime.running)))
+    case ExtendButtonEvent if enabled (model).contains (ExtendButtonEvent) =>
+      if (!model.extended) Outcome (stepTutorial (extend (model, context.gameTime.running)))
+      else Outcome (stepTutorial (unextend (model, context.gameTime.running)))
+    case KeyboardEvent.KeyDown (Keys.UP_ARROW) if enabled (model).contains (ExtendButtonEvent) =>
+      Outcome (stepTutorial (extend (model, context.gameTime.running)))
+    case KeyboardEvent.KeyDown (Keys.DOWN_ARROW) if enabled (model).contains (ExtendButtonEvent) =>
+      Outcome (stepTutorial (unextend (model, context.gameTime.running)))
+    case BackButtonEvent if enabled (model).contains (BackButtonEvent) =>
+      Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
+    case KeyboardEvent.KeyUp (Keys.ESCAPE) if enabled (model).contains (BackButtonEvent) =>
+      Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
+    case ReplayButtonEvent if enabled (model).contains (ReplayButtonEvent) =>
+      Outcome (stepTutorial (play (model.maze, model.tutorial)))
+    case KeyboardEvent.KeyUp (Keys.KEY_R) if enabled (model).contains (ReplayButtonEvent) =>
+      Outcome (stepTutorial (play (model.maze, model.tutorial)))
     case _ => Outcome (model)
   }
 
@@ -56,7 +60,8 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
    * the player has won or lost. */
   def present (context: FrameContext[StartupData], model: PlayModel, viewModel: SceneViewModel): SceneUpdateFragment = {
     val drawControls = Group (viewModel.playSceneButtons.map (_.draw))
-    if (model.status == Playing || model.playerMoves.nonEmpty || model.boulderMoves.nonEmpty)
+    val base =
+      if (model.status == Playing || model.playerMoves.nonEmpty || model.boulderMoves.nonEmpty)
         SceneUpdateFragment.empty
           .addGameLayerNodes (
             Group (planGraphics (model.maze.leftWalls, model.maze, GameAssets.wall)),
@@ -70,7 +75,6 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
             drawMovingBoulder (model, context.gameTime.running),
             Text (instructionLine1, horizontalCenter, footerStart + cellSize, 1, GameAssets.fontKey).alignCenter,
             drawControls,
-            GameAssets.tutorialBox.moveTo (tutorialGuideBoxPosition)
           )
     else {
       val message =
@@ -84,6 +88,14 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
           drawControls
         )
     }
+    if (model.tutorial.isEmpty) base
+    else base.addGameLayerNodes (
+      Group (placeIndicator (model.tutorial.head.indicator, model).toList),
+      GameAssets.tutorialBox.moveTo (tutorialGuideBoxPosition),
+      Text (model.tutorial.head.text1, tutorialGuideBoxPosition.x + 5, tutorialGuideBoxPosition.y + 10, 1, GameAssets.fontKey),
+      Text (model.tutorial.head.text2, tutorialGuideBoxPosition.x + 5, tutorialGuideBoxPosition.y + 25, 1, GameAssets.fontKey),
+      Text (model.tutorial.head.continue, tutorialGuideBoxPosition.x + 5, tutorialGuideBoxPosition.y + 40, 1, GameAssets.fontKey)
+    )
   }
 
   def drawPlayer (model: PlayModel, time: Seconds): Group = {
@@ -116,7 +128,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
     }
 
   def drawDiamond (model: PlayModel): Group =
-    if (model.diamondTaken) Group (List.empty)
+    if (model.diamondTaken && !reachingDiamond (model)) Group (List.empty)
     else Group (place (model.maze.diamond, model.maze, GameAssets.diamond))
 
   /** Draw the walls on the right hand side of the level (not included in the level spec). */

@@ -10,24 +10,29 @@ case object Playing extends PlayStatus
 case class Lost (message: String) extends PlayStatus
 case object Won extends PlayStatus
 
-case class Movement (from: GridPoint, dx: Int, dy: Int, started: Seconds)
+case class Movement (from: GridPoint, dx: Int, dy: Int, collecting: Boolean, started: Seconds)
 
 /** The play model is defined by the level being played, the current position of the player and boulders,
  * whether the player is extended upwards, whether the diamond has been collected, and the status of play. */
 final case class PlayModel (maze: Level, position: GridPoint, boulders: Vector[Vector[Boolean]],
                             extended: Boolean, diamondTaken: Boolean, status: PlayStatus,
                             playerMoves: Vector[Movement], boulderMoves: Vector[Movement],
-                            tutorial: Boolean = false)
+                            tutorial: Vector[TutorialGuideLine])
 
 object PlayModel {
   /** The default play model is initialised from the default level. */
   val uninitiated: PlayModel = play (Level.uninitiated)
 
+  val allButtonEvents: Set[PlaySceneButtonEvent] =
+    Set (BackButtonEvent, ReplayButtonEvent, LeftButtonEvent, RightButtonEvent, ExtendButtonEvent)
+
   /** Creates a play model from the given level, with the player and boulders in their start positions,
    * the player not extended, the diamond not collected, and the play status as currently playing (not lost or won). */
-  def play (maze: Level): PlayModel =
+  def play (maze: Level, tutorial: Vector[TutorialGuideLine]): PlayModel =
     PlayModel (maze, maze.start, maze.boulders, extended = false, diamondTaken = false,
-      status = Playing, playerMoves = Vector.empty, boulderMoves = Vector.empty)
+      status = Playing, playerMoves = Vector.empty, boulderMoves = Vector.empty, tutorial)
+
+  def play (maze: Level): PlayModel = play (maze, Vector.empty)
 
   /** Returns true if the player or boulder could move from the given position left or right (as given by dx)
    * and considering whether it can push a boulder in doing so. */
@@ -96,7 +101,8 @@ object PlayModel {
   def movePlayer (model: PlayModel, dx: Int, dy: Int, started: Seconds): PlayModel =
     collect (
       model.copy (position = model.position.moveBy (dx, dy), extended = dy == -1,
-        playerMoves = model.playerMoves :+ Movement (model.position, dx, dy, started)))
+        playerMoves = model.playerMoves :+ Movement (model.position, dx, dy,
+          !model.diamondTaken && model.maze.diamond == model.position.moveBy (dx, dy), started)))
 
   /** Checks whether the player's new position is the same as the diamond, collecting it if so, or
    * the exit, changing status to won if the diamond has been collected. */
@@ -116,7 +122,7 @@ object PlayModel {
   def moveBoulder (model: PlayModel, position: GridPoint, dx: Int, dy: Int, started: Seconds): PlayModel =
     squash (
       setBoulder (setBoulder (model, position, false), position.moveBy (dx, dy), true).
-        copy (boulderMoves = model.boulderMoves :+ Movement (position, dx, dy, started)),
+        copy (boulderMoves = model.boulderMoves :+ Movement (position, dx, dy, false, started)),
       position.moveBy (dx, dy))
 
   /** Checks whether a boulder being at the given position squashes the diamond or exit, changing play status
@@ -150,4 +156,13 @@ object PlayModel {
   def movingBoulderDestination (model: PlayModel): Option[GridPoint] =
     if (model.boulderMoves.isEmpty) None
     else Some (model.boulderMoves.last.from.moveBy (model.boulderMoves.last.dx, model.boulderMoves.last.dy))
+
+  def reachingDiamond (model: PlayModel): Boolean =
+    model.playerMoves.exists (_.collecting)
+
+  def enabled (model: PlayModel): Set[PlaySceneButtonEvent] =
+    if (model.tutorial.isEmpty) allButtonEvents else model.tutorial.head.enabled
+
+  def stepTutorial (model: PlayModel): PlayModel =
+    model.copy (tutorial = model.tutorial.drop (1))
 }

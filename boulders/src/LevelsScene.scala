@@ -18,7 +18,7 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateModel (context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case TutorialButtonEvent =>
-      Outcome (playLens.set (model, play (model.tutorial))).
+      Outcome (playLens.set (model, play (model.tutorial, model.guide))).
         addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
     case LevelButtonEvent (level) =>
       Outcome (playLens.set (model, play (model.levels (level)))).

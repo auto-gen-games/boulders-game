@@ -1,0 +1,28 @@
+P;This is you
+D;You need to collect this;diamond
+X;Then reach this exit
+-;You can push boulders
+-;But they squash the;diamond
+<;Push the boulder left
+R;Lets try again
+>;Move right instead
+>;Try pushing the boulder
+-;It will not move as;anothers on top
+^;Extend up
+>;We can push the top;boulder
+R;Boulders squash the exit;too
+^;Extend up
+<;Climb on the left boulder
+^;Extend up again
+<;And collect the diamond
+>;Push right
+>;And again
+>;Try pushing right
+-;We cannot push two in a;row
+^;Extend up
+>;Climb right
+^;Up more
+>;Push right
+>;And again
+>;Fall off
+<;And left to win!

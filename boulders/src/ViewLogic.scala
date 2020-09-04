@@ -58,4 +58,16 @@ object ViewLogic {
     val box = levelButtonPosition (level)
     Point (box.x + numberLeftPos (level + 1), box.y + 10)
   }
+
+  def placeIndicator (indicator: Indicator, model: PlayModel): Option[Renderable] =
+    indicator match {
+      case NoIndicator => None
+      case PlayerIndicator => Some (place (model.position, model.maze, GameAssets.highlight))
+      case DiamondIndicator => Some (place (model.maze.diamond, model.maze, GameAssets.highlight))
+      case ExitIndicator => Some (place (model.maze.exit, model.maze, GameAssets.highlight))
+      case LeftIndicator => Some (GameAssets.highlight.moveTo (Settings.leftControlPosition))
+      case RightIndicator => Some (GameAssets.highlight.moveTo (Settings.rightControlPosition))
+      case ExtendIndicator => Some (GameAssets.highlight.moveTo (Settings.extendControlPosition))
+      case ReplayIndicator => Some (GameAssets.highlight.moveTo (Settings.replayBoxPosition))
+    }
 }
