@@ -1,7 +1,7 @@
 import Level.{hasFloor, hasLeftWall, inBounds}
 import Matrix.updated
 import Settings.stepTime
-import indigo.shared.formats.SpriteAndAnimations
+import indigo.shared.scenegraph.{Graphic, Sprite}
 import indigo.shared.time.Seconds
 
 import scala.annotation.tailrec
@@ -12,14 +12,16 @@ case object Playing extends PlayStatus
 case class Lost (message: String) extends PlayStatus
 case object Won extends PlayStatus
 
-case class Movement (from: GridPoint, dx: Int, dy: Int, collecting: Boolean, started: Seconds)
+/** Records a single movement of the player or a boulder, from which to produce animations */
+case class Movement (from: GridPoint, dx: Int, dy: Int, collecting: Boolean, started: Seconds,
+                     image: Graphic)
 
 /** The play model is defined by the level being played, the current position of the player and boulders,
  * whether the player is extended upwards, whether the diamond has been collected, and the status of play. */
 final case class PlayModel (maze: Level, position: GridPoint, boulders: Vector[Vector[Boolean]],
                             extended: Boolean, diamondTaken: Boolean, status: PlayStatus,
                             playerMoves: Vector[Movement], boulderMoves: Vector[Movement],
-                            tutorial: Vector[TutorialGuideLine], highlight: SpriteAndAnimations)
+                            tutorial: Vector[TutorialGuideLine], highlight: Sprite)
 
 object PlayModel {
   /** Enable all buttons on the play scene by default */
@@ -28,11 +30,11 @@ object PlayModel {
 
   /** Creates a play model from the given level, with the player and boulders in their start positions,
    * the player not extended, the diamond not collected, and the play status as currently playing (not lost or won). */
-  def play (maze: Level, tutorial: Vector[TutorialGuideLine], highlight: SpriteAndAnimations): PlayModel =
+  def play (maze: Level, tutorial: Vector[TutorialGuideLine], highlight: Sprite): PlayModel =
     PlayModel (maze, maze.start, maze.boulders, extended = false, diamondTaken = false,
       status = Playing, playerMoves = Vector.empty, boulderMoves = Vector.empty, tutorial, highlight)
 
-  def play (maze: Level, highlight: SpriteAndAnimations): PlayModel = play (maze, Vector.empty, highlight)
+  def play (maze: Level, highlight: Sprite): PlayModel = play (maze, Vector.empty, highlight)
 
   /** Returns true if the player or boulder could move from the given position left or right (as given by dx)
    * and considering whether it can push a boulder in doing so. */
@@ -55,29 +57,33 @@ object PlayModel {
    * will be pushed. If there is nothing under the player or boulder on moving, they will fall until stopping. */
   def move (model: PlayModel, dx: Int, started: Seconds): PlayModel =
     if (canMove (model, model.position, dx, allowPush = true))
-      playerFall (push (movePlayer (model, dx, 0, started), dx, started), started + stepTime)
+      playerFall (push (movePlayer (model, dx, 0,
+        hasBoulder (model, model.position.moveBy (dx, 0)), started), dx, started),
+        started + stepTime)
     else
-      model
+      model.copy (playerMoves = model.playerMoves :+ Movement (model.position, 0, 0, false, started,
+        tryGraphic (dx, 0)))
 
   /** Extend the player upwards if possible. */
   def extend (model: PlayModel, started: Seconds): PlayModel =
     if (model.extended || hasFloor (model.maze, model.position.moveBy (0, -1 )))
       model
     else
-      movePlayer (model, 0, -1, started)
+      movePlayer (model, 0, -1, false, started)
 
   /** Unextend the player if extended. */
   def unextend (model: PlayModel, started: Seconds): PlayModel =
     if (!model.extended)
       model
     else
-      movePlayer (model, 0, 1, started)
+      movePlayer (model, 0, 1, false, started)
 
   /** Called after a player moves, this pushes a boulder at the moved to position if there is one, and then
    * lets it fall until stopped. */
   def push (model: PlayModel, dx: Int, started: Seconds): PlayModel =
     if (hasBoulder (model, model.position))
-      boulderFall (moveBoulder (model, model.position, dx, 0, started), model.position.moveBy (dx, 0), started + stepTime)
+      boulderFall (moveBoulder (model, model.position, dx, 0,
+        started), model.position.moveBy (dx, 0), started + stepTime)
     else
       model
 
@@ -85,7 +91,7 @@ object PlayModel {
   @tailrec
   def playerFall (model: PlayModel, started: Seconds): PlayModel =
     if (model.status != Won && !hasFloor (model.maze, model.position) && !hasBoulder (model, model.position.moveBy (0, 1)))
-      playerFall (movePlayer (model, 0, 1, started), started + stepTime)
+      playerFall (movePlayer (model, 0, 1, false, started), started + stepTime)
     else model
 
   /** Moves the boulder at the given position down until it reaches a supporting floor or boulder. */
@@ -95,14 +101,33 @@ object PlayModel {
       boulderFall (moveBoulder (model, position, 0, 1, started), position.moveBy (0, 1), started + stepTime)
     else model
 
+  /** Gives the default graphic for the player moving in a given direction, pushing a boulder or not */
+  def moveGraphic (dx: Int, dy: Int, pushing: Boolean): Graphic =
+    (dx, dy, pushing) match {
+      case (0, 1, _) => GameAssets.playerFalling
+      case (-1, 0, false) => GameAssets.playerLeft
+      case (-1, 0, true) => GameAssets.playerLeftPush
+      case (1, 0, false) => GameAssets.playerRight
+      case (1, 0, true) => GameAssets.playerRightPush
+      case _ => GameAssets.player
+    }
+
+  /** Gives the graphic for the player trying but failing to move in a given direction */
+  def tryGraphic (dx: Int, dy: Int): Graphic =
+    (dx, dy) match {
+      case (-1, 0) => GameAssets.playerLeftPush
+      case (1, 0) => GameAssets.playerRightPush
+      case _ => GameAssets.player
+    }
 
   /** Move the player by the given dx and dy, collecting the diamond or exiting successfully if appropriate,
    * and unextending unless the move is upwards. */
-  def movePlayer (model: PlayModel, dx: Int, dy: Int, started: Seconds): PlayModel =
+  def movePlayer (model: PlayModel, dx: Int, dy: Int, pushing: Boolean, started: Seconds): PlayModel =
     collect (
       model.copy (position = model.position.moveBy (dx, dy), extended = dy == -1,
         playerMoves = model.playerMoves :+ Movement (model.position, dx, dy,
-          !model.diamondTaken && model.maze.diamond == model.position.moveBy (dx, dy), started)))
+          !model.diamondTaken && model.maze.diamond == model.position.moveBy (dx, dy), started,
+          moveGraphic (dx, dy, pushing))))
 
   /** Checks whether the player's new position is the same as the diamond, collecting it if so, or
    * the exit, changing status to won if the diamond has been collected. */
@@ -122,7 +147,8 @@ object PlayModel {
   def moveBoulder (model: PlayModel, position: GridPoint, dx: Int, dy: Int, started: Seconds): PlayModel =
     squash (
       setBoulder (setBoulder (model, position, false), position.moveBy (dx, dy), true).
-        copy (boulderMoves = model.boulderMoves :+ Movement (position, dx, dy, false, started)),
+        copy (boulderMoves = model.boulderMoves :+
+          Movement (position, dx, dy, false, started, GameAssets.boulder)),
       position.moveBy (dx, dy))
 
   /** Checks whether a boulder being at the given position squashes the diamond or exit, changing play status

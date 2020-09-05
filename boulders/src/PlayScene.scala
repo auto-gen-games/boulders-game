@@ -20,7 +20,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateModel (context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
     case FrameTick =>
-      Outcome (updateMovement (model, context.gameTime.running))
+      Outcome (updateMovement (model, context.gameTime.running).copy (highlight = model.highlight.play))
     case KeyboardEvent.KeyUp (Keys.SPACE) if enabled (model).contains (SpaceContinueEvent) =>
       Outcome (stepTutorial (model))
     case LeftButtonEvent if enabled (model).contains (LeftButtonEvent) =>
@@ -103,13 +103,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
     val stepCompletion = if (model.playerMoves.isEmpty) 0.0 else (time - model.playerMoves.head.started).toDouble / stepTime.toDouble
     val offsetX = if (model.playerMoves.isEmpty) 0.0 else stepCompletion * model.playerMoves.head.dx
     val offsetY = if (model.playerMoves.isEmpty) 0.0 else stepCompletion * model.playerMoves.head.dy
-    val graphic = if (model.playerMoves.isEmpty) GameAssets.player else
-      (model.playerMoves.head.dx, model.playerMoves.head.dy) match {
-        case (0, -1) => GameAssets.player
-        case (0, 1) => GameAssets.playerFalling
-        case (-1, 0) => GameAssets.playerLeft
-        case (1, 0) => GameAssets.playerRight
-      }
+    val graphic = if (model.playerMoves.isEmpty) GameAssets.player else model.playerMoves.head.image
 
     if (!model.extended)
       Group (place (position, model.maze, graphic, offsetX, offsetY))

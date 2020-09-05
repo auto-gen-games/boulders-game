@@ -10,8 +10,7 @@ object ViewLogic {
     val buttonAssets = ButtonAssets (
       up = Graphic (0, 0, size, size, 2, material).withCrop (0, row * size, size, size),
       over = Graphic (0, 0, size, size, 2, material).withCrop (size, row * size, cellSize, size),
-      down = Graphic (0, 0, size, size, 2, material).withCrop (size * 2, row * size, size, size)
-    )
+      down = Graphic (0, 0, size, size, 2, material).withCrop (size * 2, row * size, size, size))
     Button (buttonAssets = buttonAssets,
       bounds = Rectangle (position.x, position.y, cellSize, cellSize),
       depth = Depth (2)).
@@ -59,15 +58,15 @@ object ViewLogic {
     Point (box.x + numberLeftPos (level + 1), box.y + 10)
   }
 
-  def placeIndicator (indicator: Indicator, model: PlayModel, highlight: SpriteAndAnimations): Option[Renderable] =
+  def placeIndicator (indicator: Indicator, model: PlayModel, highlight: Sprite): Option[Renderable] =
     indicator match {
       case NoIndicator => None
-      case PlayerIndicator => Some (place (model.position, model.maze, highlight.sprite.play))
-      case DiamondIndicator => Some (place (model.maze.diamond, model.maze, highlight.sprite.play))
-      case ExitIndicator => Some (place (model.maze.exit, model.maze, highlight.sprite.play))
-      case LeftIndicator => Some (highlight.sprite.moveTo (Settings.leftControlPosition).play)
-      case RightIndicator => Some (highlight.sprite.moveTo (Settings.rightControlPosition).play)
-      case ExtendIndicator => Some (highlight.sprite.moveTo (Settings.extendControlPosition).play)
-      case ReplayIndicator => Some (highlight.sprite.moveTo (Settings.replayBoxPosition).play)
+      case PlayerIndicator => Some (place (model.position, model.maze, highlight.play))
+      case DiamondIndicator => Some (place (model.maze.diamond, model.maze, highlight.play))
+      case ExitIndicator => Some (place (model.maze.exit, model.maze, highlight.play))
+      case LeftIndicator => Some (highlight.moveTo (Settings.leftControlPosition).play)
+      case RightIndicator => Some (highlight.moveTo (Settings.rightControlPosition).play)
+      case ExtendIndicator => Some (highlight.moveTo (Settings.extendControlPosition).play)
+      case ReplayIndicator => Some (highlight.moveTo (Settings.replayBoxPosition).play)
     }
 }

@@ -36,6 +36,8 @@ object GameAssets {
   val playerLeft = playerRight.flipHorizontal (true)
   val playerBottom = graphic ("player-bottom")
   val playerTop = graphic ("player-top")
+  val playerLeftPush = graphic ("left-push")
+  val playerRightPush = graphic ("right-push")
   val boulder = graphic ("boulder")
   val wall = graphic ("wall")
   val floor = graphic ("floor")
@@ -47,12 +49,12 @@ object GameAssets {
   def loadAnimation (assetCollection: AssetCollection, dice: Dice, jsonRef: AssetName,
                      name: AssetName, depth: Depth): Option[SpriteAndAnimations] = {
     val json = assetCollection.findTextDataByName(jsonRef)
-    if (json.isEmpty) System.err.println("Could not load JSON")
+    if (json.isEmpty) System.err.println ("Could not load JSON")
     val aseprite = json.flatMap (Json.asepriteFromJson)
-    if (aseprite.isEmpty) System.err.println("Could not parse JSON")
+    if (aseprite.isEmpty) System.err.println ("Could not parse JSON")
     val spriteAndAnimations = aseprite.flatMap (_.toSpriteAndAnimations (dice, name))
-    if (spriteAndAnimations.isEmpty) System.err.println("Could not create animation")
-    spriteAndAnimations.map (sas => sas.copy(sprite = sas.sprite.withDepth(depth)))
+    if (spriteAndAnimations.isEmpty) System.err.println ("Could not create animation")
+    spriteAndAnimations.map (sas => sas.copy(sprite = sas.sprite.withDepth (depth)))
   }
 
   val fontKey: FontKey = FontKey ("small font")
