@@ -1,4 +1,5 @@
 import indigo.scenes.Lens
+import indigo.shared.formats.SpriteAndAnimations
 import indigo.shared.scenegraph.Sprite
 
 /** The overall model for the game is the set of levels and the current play grid. */

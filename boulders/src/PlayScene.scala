@@ -1,5 +1,5 @@
 import PlayModel._
-import Settings.{cellSize, footerStart, horizontalCenter, stepTime, tutorialGuideBoxPosition, verticalMiddle}
+import Settings._
 import ViewLogic._
 import indigo._
 import indigo.scenes._
@@ -20,7 +20,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateModel (context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
     case FrameTick =>
-      Outcome (updateMovement (model, context.gameTime.running).copy (highlight = model.highlight.play))
+      Outcome (updateMovement (model, context.gameTime.running)) //.copy (highlight = model.highlight.play))
     case KeyboardEvent.KeyUp (Keys.SPACE) if enabled (model).contains (SpaceContinueEvent) =>
       Outcome (stepTutorial (model))
     case LeftButtonEvent if enabled (model).contains (LeftButtonEvent) =>

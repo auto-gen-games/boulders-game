@@ -58,15 +58,42 @@ object ViewLogic {
     Point (box.x + numberLeftPos (level + 1), box.y + 10)
   }
 
-  def placeIndicator (indicator: Indicator, model: PlayModel, highlight: Sprite): Option[Renderable] =
+  def placeIndicator (indicator: Indicator, model: PlayModel, highlight: Sprite): Option[Sprite] =
     indicator match {
-      case NoIndicator => None
-      case PlayerIndicator => Some (place (model.position, model.maze, highlight.play))
-      case DiamondIndicator => Some (place (model.maze.diamond, model.maze, highlight.play))
-      case ExitIndicator => Some (place (model.maze.exit, model.maze, highlight.play))
-      case LeftIndicator => Some (highlight.moveTo (Settings.leftControlPosition).play)
-      case RightIndicator => Some (highlight.moveTo (Settings.rightControlPosition).play)
-      case ExtendIndicator => Some (highlight.moveTo (Settings.extendControlPosition).play)
-      case ReplayIndicator => Some (highlight.moveTo (Settings.replayBoxPosition).play)
+      case NoIndicator =>
+        None
+
+      case PlayerIndicator =>
+        Some(
+          highlight
+            .moveTo(gridPointToPoint(model.position, model.maze))
+            .play()
+        )
+
+      case DiamondIndicator =>
+        Some(
+          highlight
+            .moveTo(gridPointToPoint(model.maze.diamond, model.maze))
+            .play()
+        )
+
+      case ExitIndicator =>
+        Some(
+          highlight
+            .moveTo(gridPointToPoint(model.maze.exit, model.maze))
+            .play()
+        )
+
+      case LeftIndicator =>
+        Some(highlight.moveTo(Settings.leftControlPosition).play())
+
+      case RightIndicator =>
+        Some(highlight.moveTo(Settings.rightControlPosition).play())
+
+      case ExtendIndicator =>
+        Some(highlight.moveTo(Settings.extendControlPosition).play())
+
+      case ReplayIndicator =>
+        Some(highlight.moveTo(Settings.replayBoxPosition).play())
     }
 }

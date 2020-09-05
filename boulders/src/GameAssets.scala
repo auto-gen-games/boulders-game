@@ -48,7 +48,7 @@ object GameAssets {
 
   def loadAnimation (assetCollection: AssetCollection, dice: Dice, jsonRef: AssetName,
                      name: AssetName, depth: Depth): Option[SpriteAndAnimations] = {
-    val json = assetCollection.findTextDataByName(jsonRef)
+    val json = assetCollection.findTextDataByName (jsonRef)
     if (json.isEmpty) System.err.println ("Could not load JSON")
     val aseprite = json.flatMap (Json.asepriteFromJson)
     if (aseprite.isEmpty) System.err.println ("Could not parse JSON")
