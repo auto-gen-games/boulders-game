@@ -1,14 +1,16 @@
 import Settings._
 import indigo._
+import indigo.json.Json
+import indigo.platform.assets.AssetCollection
 
 /** Assets: graphics, level specs (text), and font (copied from Snake demo) */
 object GameAssets {
   val imageFiles = Set ("boulder", "boxy_font_small", "button-base", "diamond", "exit",
-    "floor", "highlight", "left-push",
+    "floor", "highlight-sheet", "left-push",
     "player-bottom", "player-sprite", "player-top", "right-push", "tutorial-box", "wall")
   val buttonFiles = Set ("back-button", "control-arrows", "info-button", "replay-button")
   val textFiles = Set ("levels", "tutorial-level", "tutorial-guide")
-  val jsonFiles = Set ()
+  val jsonFiles = Set ("highlight")
 
   def assets (baseUrl: String): Set[AssetType] =
     imageFiles.map (file => AssetType.Image (AssetName (file), AssetPath (baseUrl + s"assets/$file.png"))) ++
@@ -25,6 +27,8 @@ object GameAssets {
   val levelSpecs = AssetName ("levels")
   val tutorialSpec = AssetName ("tutorial-level")
   val tutorialGuide = AssetName ("tutorial-guide")
+  val highlightBox = AssetName ("highlight-sheet")
+  val highlightJSON = AssetName ("highlight")
 
   val player = graphic ("player-sprite").withCrop (0, 0, cellSize, cellSize)
   val playerRight = graphic ("player-sprite").withCrop (cellSize, 0, cellSize, cellSize)
@@ -38,7 +42,18 @@ object GameAssets {
   val diamond = graphic ("diamond")
   val exit = graphic ("exit")
   val tutorialBox = graphic ("tutorial-box", 256, 64)
-  val highlight = graphic ("highlight").withCrop (0, 0, cellSize, cellSize)
+  //val highlight = graphic ("highlight").withCrop (0, 0, cellSize, cellSize)
+
+  def loadAnimation (assetCollection: AssetCollection, dice: Dice, jsonRef: AssetName,
+                     name: AssetName, depth: Depth): Option[SpriteAndAnimations] = {
+    val json = assetCollection.findTextDataByName(jsonRef)
+    if (json.isEmpty) System.err.println("Could not load JSON")
+    val aseprite = json.flatMap(x => Json.asepriteFromJson(x))
+    if (aseprite.isEmpty) System.err.println("Could not parse JSON")
+    val spriteAndAnimations = aseprite.flatMap (x => x.toSpriteAndAnimations(dice, name))
+    if (spriteAndAnimations.isEmpty) System.err.println("Could not create animation")
+    spriteAndAnimations.map (x => x.copy(sprite = x.sprite.withDepth(depth)))
+  }
 
   val fontKey: FontKey = FontKey ("small font")
 

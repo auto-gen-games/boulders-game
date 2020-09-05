@@ -3,15 +3,17 @@ import indigo.scenes.{Scene, SceneName}
 
 import scala.scalajs.js.annotation.JSExportTopLevel
 import indigoextras.ui.Button
-import GameAssets.{levelSpecs, tutorialGuide, tutorialSpec}
+import GameAssets.{highlightBox, highlightJSON, levelSpecs, tutorialGuide, tutorialSpec}
 import Settings._
 import ViewLogic._
 
 @JSExportTopLevel("IndigoGame")
 object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] {
-  /** The initial game model is the list of loaded level specifications and a default level layout. */
+  /** The initial game model contains the loaded levels and starts with the tutorial level. */
   def initialModel (startupData: StartupData): Model =
-    Model (startupData.tutorial, startupData.levels, PlayModel.uninitiated, startupData.guide)
+    Model (startupData.tutorial, startupData.levels,
+      PlayModel.play (startupData.tutorial, startupData.guide, startupData.highlightAnimation),
+      startupData.guide, startupData.highlightAnimation)
 
   /** Copied from the Snake demo, loading assets and the viewport. */
   def boot (flags: Map[String, String]): BootResult[GameViewport] = {
@@ -36,10 +38,13 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
     Some (StartScene.name)
 
   /** Load and decode the level specs on startup. */
-  def setup (bootData: GameViewport, assetCollection: AssetCollection, dice: Dice): Startup[StartupErrors, StartupData] =
+  def setup (bootData: GameViewport, assetCollection: AssetCollection, dice: Dice): Startup[StartupErrors, StartupData] = {
+    val highlight = GameAssets.loadAnimation (assetCollection, dice, highlightJSON, highlightBox, Depth (3))
     Startup.Success (StartupData (bootData, assetCollection.findTextDataByName (tutorialSpec).map (Level.levelFromCode).getOrElse (Level.uninitiated),
       assetCollection.findTextDataByName (levelSpecs).map (Level.decodeLevels).getOrElse (Vector.empty),
-      assetCollection.findTextDataByName (tutorialGuide).map (TutorialGuideLine.loadGuide).getOrElse (Vector.empty)))
+      assetCollection.findTextDataByName (tutorialGuide).map (TutorialGuideLine.loadGuide).getOrElse (Vector.empty),
+      highlight.orNull))
+  }
 
   def initialViewModel (startupData: StartupData, model: Model): ViewModel = {
     val leftButton: Button = createButton ("control-arrows", leftControlPosition, LeftButtonEvent, row = 0)

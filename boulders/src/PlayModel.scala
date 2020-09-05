@@ -1,7 +1,9 @@
 import Level.{hasFloor, hasLeftWall, inBounds}
 import Matrix.updated
 import Settings.stepTime
+import indigo.shared.formats.SpriteAndAnimations
 import indigo.shared.time.Seconds
+
 import scala.annotation.tailrec
 
 /** The status of play: still playing, lost (with reason) or won. */
@@ -17,22 +19,20 @@ case class Movement (from: GridPoint, dx: Int, dy: Int, collecting: Boolean, sta
 final case class PlayModel (maze: Level, position: GridPoint, boulders: Vector[Vector[Boolean]],
                             extended: Boolean, diamondTaken: Boolean, status: PlayStatus,
                             playerMoves: Vector[Movement], boulderMoves: Vector[Movement],
-                            tutorial: Vector[TutorialGuideLine])
+                            tutorial: Vector[TutorialGuideLine], highlight: SpriteAndAnimations)
 
 object PlayModel {
-  /** The default play model is initialised from the default level. */
-  val uninitiated: PlayModel = play (Level.uninitiated)
-
+  /** Enable all buttons on the play scene by default */
   val allButtonEvents: Set[PlaySceneButtonEvent] =
     Set (BackButtonEvent, ReplayButtonEvent, LeftButtonEvent, RightButtonEvent, ExtendButtonEvent)
 
   /** Creates a play model from the given level, with the player and boulders in their start positions,
    * the player not extended, the diamond not collected, and the play status as currently playing (not lost or won). */
-  def play (maze: Level, tutorial: Vector[TutorialGuideLine]): PlayModel =
+  def play (maze: Level, tutorial: Vector[TutorialGuideLine], highlight: SpriteAndAnimations): PlayModel =
     PlayModel (maze, maze.start, maze.boulders, extended = false, diamondTaken = false,
-      status = Playing, playerMoves = Vector.empty, boulderMoves = Vector.empty, tutorial)
+      status = Playing, playerMoves = Vector.empty, boulderMoves = Vector.empty, tutorial, highlight)
 
-  def play (maze: Level): PlayModel = play (maze, Vector.empty)
+  def play (maze: Level, highlight: SpriteAndAnimations): PlayModel = play (maze, Vector.empty, highlight)
 
   /** Returns true if the player or boulder could move from the given position left or right (as given by dx)
    * and considering whether it can push a boulder in doing so. */

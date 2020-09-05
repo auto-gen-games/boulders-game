@@ -10,7 +10,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   type SceneViewModel = ViewModel
 
   val name: SceneName = SceneName ("play scene")
-  val modelLens: Lens[Model, PlayModel] = Model.Lenses.playLens
+  val modelLens: Lens[Model, PlayModel] = Model.playLens
   val viewModelLens: Lens[ViewModel, ViewModel] = Lens.keepLatest
   val eventFilters: EventFilters = EventFilters.Default
   val subSystems: Set[SubSystem] = Set ()
@@ -43,9 +43,9 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
     case KeyboardEvent.KeyUp (Keys.ESCAPE) if enabled (model).contains (BackButtonEvent) =>
       Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
     case ReplayButtonEvent if enabled (model).contains (ReplayButtonEvent) =>
-      Outcome (stepTutorial (play (model.maze, model.tutorial)))
+      Outcome (stepTutorial (play (model.maze, model.tutorial, model.highlight)))
     case KeyboardEvent.KeyUp (Keys.KEY_R) if enabled (model).contains (ReplayButtonEvent) =>
-      Outcome (stepTutorial (play (model.maze, model.tutorial)))
+      Outcome (stepTutorial (play (model.maze, model.tutorial, model.highlight)))
     case _ => Outcome (model)
   }
 
@@ -90,7 +90,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
     }
     if (model.tutorial.isEmpty) base
     else base.addGameLayerNodes (
-      Group (placeIndicator (model.tutorial.head.indicator, model).toList),
+      Group (placeIndicator (model.tutorial.head.indicator, model, model.highlight).toList),
       GameAssets.tutorialBox.moveTo (tutorialGuideBoxPosition),
       Text (model.tutorial.head.text1, tutorialGuideBoxPosition.x + 5, tutorialGuideBoxPosition.y + 10, 1, GameAssets.fontKey),
       Text (model.tutorial.head.text2, tutorialGuideBoxPosition.x + 5, tutorialGuideBoxPosition.y + 25, 1, GameAssets.fontKey),

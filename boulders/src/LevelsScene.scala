@@ -1,6 +1,6 @@
 import indigo._
 import indigo.scenes._
-import Model.Lenses.playLens
+import Model.playLens
 import PlayModel.play
 import Settings._
 import ViewLogic._
@@ -18,10 +18,10 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateModel (context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case TutorialButtonEvent =>
-      Outcome (playLens.set (model, play (model.tutorial, model.guide))).
+      Outcome (playLens.set (model, play (model.tutorial, model.guide, model.highlight))).
         addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
     case LevelButtonEvent (level) =>
-      Outcome (playLens.set (model, play (model.levels (level)))).
+      Outcome (playLens.set (model, play (model.levels (level), model.highlight))).
         addGlobalEvents (SceneEvent.JumpTo (PlayScene.name))
     case _ =>
       Outcome (model)
