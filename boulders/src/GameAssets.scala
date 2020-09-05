@@ -48,11 +48,11 @@ object GameAssets {
                      name: AssetName, depth: Depth): Option[SpriteAndAnimations] = {
     val json = assetCollection.findTextDataByName(jsonRef)
     if (json.isEmpty) System.err.println("Could not load JSON")
-    val aseprite = json.flatMap(x => Json.asepriteFromJson(x))
+    val aseprite = json.flatMap (Json.asepriteFromJson)
     if (aseprite.isEmpty) System.err.println("Could not parse JSON")
-    val spriteAndAnimations = aseprite.flatMap (x => x.toSpriteAndAnimations(dice, name))
+    val spriteAndAnimations = aseprite.flatMap (_.toSpriteAndAnimations (dice, name))
     if (spriteAndAnimations.isEmpty) System.err.println("Could not create animation")
-    spriteAndAnimations.map (x => x.copy(sprite = x.sprite.withDepth(depth)))
+    spriteAndAnimations.map (sas => sas.copy(sprite = sas.sprite.withDepth(depth)))
   }
 
   val fontKey: FontKey = FontKey ("small font")

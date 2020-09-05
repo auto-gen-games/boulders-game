@@ -40,6 +40,7 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
   /** Load and decode the level specs on startup. */
   def setup (bootData: GameViewport, assetCollection: AssetCollection, dice: Dice): Startup[StartupErrors, StartupData] = {
     val highlight = GameAssets.loadAnimation (assetCollection, dice, highlightJSON, highlightBox, Depth (3))
+    // Note: orNull to be removed when I find a good way to handle the error!
     Startup.Success (StartupData (bootData, assetCollection.findTextDataByName (tutorialSpec).map (Level.levelFromCode).getOrElse (Level.uninitiated),
       assetCollection.findTextDataByName (levelSpecs).map (Level.decodeLevels).getOrElse (Vector.empty),
       assetCollection.findTextDataByName (tutorialGuide).map (TutorialGuideLine.loadGuide).getOrElse (Vector.empty),
