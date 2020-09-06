@@ -5,61 +5,79 @@ import indigo.platform.assets.AssetCollection
 
 /** Assets: graphics, level specs (text), and font (copied from Snake demo) */
 object GameAssets {
-  val imageFiles = Set ("boulder", "boxy_font_small", "button-base", "diamond", "exit",
-    "floor", "highlight-sheet", "left-push",
-    "player-bottom", "player-sprite", "player-top", "right-push", "tutorial-box", "wall")
-  val buttonFiles = Set ("back-button", "control-arrows", "info-button", "replay-button")
-  val textFiles = Set ("levels", "tutorial-level", "tutorial-guide")
-  val jsonFiles = Set ("highlight")
+  val imageFiles = Set(
+    "boulder",
+    "boxy_font_small",
+    "button-base",
+    "diamond",
+    "exit",
+    "floor",
+    "highlight-sheet",
+    "left-push",
+    "player-bottom",
+    "player-sprite",
+    "player-top",
+    "right-push",
+    "tutorial-box",
+    "wall"
+  )
+  val buttonFiles = Set("back-button", "control-arrows", "replay-button")
+  val textFiles   = Set("levels", "tutorial-level", "tutorial-guide")
+  val jsonFiles   = Set("highlight")
 
-  def assets (baseUrl: String): Set[AssetType] =
-    imageFiles.map (file => AssetType.Image (AssetName (file), AssetPath (baseUrl + s"assets/$file.png"))) ++
-      buttonFiles.map (file => AssetType.Image (AssetName (file), AssetPath (baseUrl + s"assets/$file.png"))) ++
-      textFiles.map (file => AssetType.Text (AssetName (file), AssetPath (baseUrl + s"assets/$file.txt"))) ++
-      jsonFiles.map (file => AssetType.Text (AssetName (file), AssetPath (baseUrl + s"assets/$file.json")))
+  def assets(baseUrl: String): Set[AssetType] =
+    imageFiles.map(file => AssetType.Image(AssetName(file), AssetPath(baseUrl + s"assets/$file.png"))) ++
+      buttonFiles.map(file => AssetType.Image(AssetName(file), AssetPath(baseUrl + s"assets/$file.png"))) ++
+      textFiles.map(file => AssetType.Text(AssetName(file), AssetPath(baseUrl + s"assets/$file.txt"))) ++
+      jsonFiles.map(file => AssetType.Text(AssetName(file), AssetPath(baseUrl + s"assets/$file.json")))
 
   val materials: Map[String, Material.Textured] =
-    imageFiles.map (image => (image, Material.Textured (AssetName (image)))).toMap
+    imageFiles.map(image => (image, Material.Textured(AssetName(image)))).toMap
 
-  def graphic (asset: String, width: Int = cellSize, height: Int = cellSize): Graphic =
-    Graphic (0, 0, width, height, 2, materials (asset))
+  def graphic(asset: String, width: Int = cellSize, height: Int = cellSize): Graphic =
+    Graphic(0, 0, width, height, 2, materials(asset))
 
-  val levelSpecs = AssetName ("levels")
-  val tutorialSpec = AssetName ("tutorial-level")
-  val tutorialGuide = AssetName ("tutorial-guide")
-  val highlightBox = AssetName ("highlight-sheet")
-  val highlightJSON = AssetName ("highlight")
+  val levelSpecs    = AssetName("levels")
+  val tutorialSpec  = AssetName("tutorial-level")
+  val tutorialGuide = AssetName("tutorial-guide")
+  val highlightBox  = AssetName("highlight-sheet")
+  val highlightJSON = AssetName("highlight")
 
-  val player = graphic ("player-sprite").withCrop (0, 0, cellSize, cellSize)
-  val playerRight = graphic ("player-sprite").withCrop (cellSize, 0, cellSize, cellSize)
-  val playerFalling = graphic ("player-sprite").withCrop (cellSize * 2, 0, cellSize, cellSize)
-  val playerLeft = playerRight.flipHorizontal (true)
-  val playerBottom = graphic ("player-bottom")
-  val playerTop = graphic ("player-top")
-  val playerLeftPush = graphic ("left-push")
-  val playerRightPush = graphic ("right-push")
-  val boulder = graphic ("boulder")
-  val wall = graphic ("wall")
-  val floor = graphic ("floor")
-  val diamond = graphic ("diamond")
-  val exit = graphic ("exit")
-  val tutorialBox = graphic ("tutorial-box", 256, 64)
+  val player          = graphic("player-sprite").withCrop(0, 0, cellSize, cellSize)
+  val playerRight     = graphic("player-sprite").withCrop(cellSize, 0, cellSize, cellSize)
+  val playerFalling   = graphic("player-sprite").withCrop(cellSize * 2, 0, cellSize, cellSize)
+  val playerLeft      = playerRight.flipHorizontal(true)
+  val playerBottom    = graphic("player-bottom")
+  val playerTop       = graphic("player-top")
+  val playerLeftPush  = graphic("left-push")
+  val playerRightPush = graphic("right-push")
+  val boulder         = graphic("boulder")
+  val wall            = graphic("wall")
+  val floor           = graphic("floor")
+  val diamond         = graphic("diamond")
+  val exit            = graphic("exit")
+  val tutorialBox     = graphic("tutorial-box", 256, 64)
 
-  def loadAnimation (assetCollection: AssetCollection, dice: Dice, jsonRef: AssetName,
-                     name: AssetName, depth: Depth): Option[SpriteAndAnimations] = {
-    val json = assetCollection.findTextDataByName (jsonRef)
-    if (json.isEmpty) System.err.println ("Could not load JSON")
-    val aseprite = json.flatMap (Json.asepriteFromJson)
-    if (aseprite.isEmpty) System.err.println ("Could not parse JSON")
-    val spriteAndAnimations = aseprite.flatMap (_.toSpriteAndAnimations (dice, name))
-    if (spriteAndAnimations.isEmpty) System.err.println ("Could not create animation")
-    spriteAndAnimations.map (sas => sas.copy(sprite = sas.sprite.withDepth (depth)))
+  def loadAnimation(
+      assetCollection: AssetCollection,
+      dice: Dice,
+      jsonRef: AssetName,
+      name: AssetName,
+      depth: Depth
+  ): Option[SpriteAndAnimations] = {
+    val json = assetCollection.findTextDataByName(jsonRef)
+    if (json.isEmpty) System.err.println("Could not load JSON")
+    val aseprite = json.flatMap(Json.asepriteFromJson)
+    if (aseprite.isEmpty) System.err.println("Could not parse JSON")
+    val spriteAndAnimations = aseprite.flatMap(_.toSpriteAndAnimations(dice, name))
+    if (spriteAndAnimations.isEmpty) System.err.println("Could not create animation")
+    spriteAndAnimations.map(sas => sas.copy(sprite = sas.sprite.withDepth(depth)))
   }
 
-  val fontKey: FontKey = FontKey ("small font")
+  val fontKey: FontKey = FontKey("small font")
 
   val fontInfo: FontInfo =
-    FontInfo (fontKey, Material.Textured (AssetName ("boxy_font_small")), 320, 230, FontChar("?", 47, 26, 11, 12))
+    FontInfo(fontKey, Material.Textured(AssetName("boxy_font_small")), 320, 230, FontChar("?", 47, 26, 11, 12))
       .addChar(FontChar("A", 2, 39, 10, 12))
       .addChar(FontChar("B", 14, 39, 9, 12))
       .addChar(FontChar("C", 25, 39, 10, 12))
