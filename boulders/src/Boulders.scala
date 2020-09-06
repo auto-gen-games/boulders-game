@@ -28,9 +28,9 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
       .withFonts (GameAssets.fontInfo)
   }
 
-  /** Four scenes: start screen, levels choice, game play screen, and instructions page */
+  /** Three scenes: start screen, levels choice, game play screen */
   def scenes (bootData: GameViewport): NonEmptyList[Scene[StartupData, Model, ViewModel]] =
-    NonEmptyList (StartScene, LevelsScene, PlayScene, InstructionsScene)
+    NonEmptyList (StartScene, LevelsScene, PlayScene)
 
   def initialScene (bootData: GameViewport): Option[SceneName] =
     Some (StartScene.name)

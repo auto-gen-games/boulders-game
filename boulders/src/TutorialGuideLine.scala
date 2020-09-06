@@ -27,10 +27,10 @@ object TutorialGuideLine {
       case _ => NoIndicator
     }
     val continue = indicator match {
-      case NoIndicator => "Press space to continue"
-      case PlayerIndicator => "Press space to continue"
-      case DiamondIndicator => "Press space to continue"
-      case ExitIndicator => "Press space to continue"
+      case NoIndicator => "Click/space to continue"
+      case PlayerIndicator => "Click/space to continue"
+      case DiamondIndicator => "Click/space to continue"
+      case ExitIndicator => "Click/space to continue"
       case LeftIndicator => "Click/press left"
       case RightIndicator => "Click/press right"
       case ExtendIndicator => "Click extend/press up"

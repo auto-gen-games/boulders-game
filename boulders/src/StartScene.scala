@@ -17,7 +17,7 @@ object StartScene extends Scene[StartupData, Model, ViewModel] {
   val subSystems: Set[SubSystem] = Set ()
 
   def updateModel (context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
-    case Click (x, y) =>
+    case Click (_, _) =>
       Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))
     case KeyboardEvent.KeyUp (Keys.SPACE) =>
       Outcome (model).addGlobalEvents (SceneEvent.JumpTo (LevelsScene.name))

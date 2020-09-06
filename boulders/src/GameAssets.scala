@@ -44,7 +44,6 @@ object GameAssets {
   val diamond = graphic ("diamond")
   val exit = graphic ("exit")
   val tutorialBox = graphic ("tutorial-box", 256, 64)
-  //val highlight = graphic ("highlight").withCrop (0, 0, cellSize, cellSize)
 
   def loadAnimation (assetCollection: AssetCollection, dice: Dice, jsonRef: AssetName,
                      name: AssetName, depth: Depth): Option[SpriteAndAnimations] = {

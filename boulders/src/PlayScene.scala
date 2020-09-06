@@ -3,6 +3,7 @@ import Settings._
 import ViewLogic._
 import indigo._
 import indigo.scenes._
+import indigo.shared.events.MouseEvent.Click
 
 /** The main gameplay scene, a grid with a maze level and a player on it. */
 object PlayScene extends Scene[StartupData, Model, ViewModel] {
@@ -21,6 +22,8 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   def updateModel (context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
     case FrameTick =>
       Outcome (updateMovement (model, context.gameTime.running)) //.copy (highlight = model.highlight.play))
+    case Click (_, _) if enabled (model).contains (SpaceContinueEvent) =>
+      Outcome (stepTutorial (model))
     case KeyboardEvent.KeyUp (Keys.SPACE) if enabled (model).contains (SpaceContinueEvent) =>
       Outcome (stepTutorial (model))
     case LeftButtonEvent if enabled (model).contains (LeftButtonEvent) =>
@@ -89,9 +92,9 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
         )
     }
     if (model.tutorial.isEmpty) base
-    else base.addGameLayerNodes (
-      Group (placeIndicator (model.tutorial.head.indicator, model, model.highlight).toList),
-      GameAssets.tutorialBox.moveTo (tutorialGuideBoxPosition),
+    else base
+      .addGameLayerNodes (placeIndicator (model.tutorial.head.indicator, model, model.highlight).toList)
+      .addGameLayerNodes (GameAssets.tutorialBox.moveTo (tutorialGuideBoxPosition),
       Text (model.tutorial.head.text1, tutorialGuideBoxPosition.x + 5, tutorialGuideBoxPosition.y + 10, 1, GameAssets.fontKey),
       Text (model.tutorial.head.text2, tutorialGuideBoxPosition.x + 5, tutorialGuideBoxPosition.y + 25, 1, GameAssets.fontKey),
       Text (model.tutorial.head.continue, tutorialGuideBoxPosition.x + 5, tutorialGuideBoxPosition.y + 40, 1, GameAssets.fontKey)
