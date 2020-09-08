@@ -49,7 +49,7 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
   ): Startup[StartupErrors, StartupData] = {
     val result = for {
       spriteAnim <- GameAssets.loadAnimation(assetCollection, dice, highlightJSON, highlightBox, Depth(0))
-      level      <- assetCollection.findTextDataByName(tutorialSpec).map(Level.levelFromCode)
+      level      <- assetCollection.findTextDataByName(tutorialSpec).map(Level.levelFromCode(-1, _))
       specs      <- assetCollection.findTextDataByName(levelSpecs).map(Level.decodeLevels)
       guide      <- assetCollection.findTextDataByName(tutorialGuide).map(TutorialGuideLine.loadGuide)
     } yield Startup
