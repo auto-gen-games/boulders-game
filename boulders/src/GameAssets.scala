@@ -1,7 +1,9 @@
 import Settings._
+import ViewLogic.levelButtonPosition
 import indigo._
 import indigo.json.Json
 import indigo.platform.assets.AssetCollection
+import indigoextras.ui.{Button, ButtonAssets}
 
 /** Assets: graphics, level specs (text), and font (copied from Snake demo) */
 object GameAssets {
@@ -36,6 +38,28 @@ object GameAssets {
 
   def graphic(asset: String, width: Int = cellSize, height: Int = cellSize): Graphic =
     Graphic(0, 0, width, height, 2, materials(asset))
+
+  /** Creates a button from the given graphics asset, at a position, and triggering an event */
+  def createButton(
+      assetName: String,
+      position: Point,
+      buttonEvent: GlobalEvent,
+      row: Int = 0,
+      size: Int = cellSize,
+      flipped: Boolean = false
+  ): Button = {
+    val material = Material.Textured(AssetName(assetName))
+    val buttonAssets = ButtonAssets(
+      up = Graphic(0, 0, size, size, 2, material).withCrop(0, row * size, size, size).flipHorizontal(flipped),
+      over = Graphic(0, 0, size, size, 2, material).withCrop(size, row * size, cellSize, size).flipHorizontal(flipped),
+      down = Graphic(0, 0, size, size, 2, material).withCrop(size * 2, row * size, size, size).flipHorizontal(flipped)
+    )
+    Button(
+      buttonAssets = buttonAssets,
+      bounds = Rectangle(position.x, position.y, cellSize, cellSize),
+      depth = Depth(2)
+    ).withUpAction(List(buttonEvent))
+  }
 
   val levelSpecs    = AssetName("levels")
   val tutorialSpec  = AssetName("tutorial-level")

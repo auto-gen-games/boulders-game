@@ -25,20 +25,20 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
     case Click(_, _) if enabled(model).contains(SpaceContinueEvent) =>
       Outcome(stepTutorial(model))
     case KeyboardEvent.KeyUp(Keys.SPACE) if enabled(model).contains(SpaceContinueEvent) =>
-      Outcome(stepTutorial(model))
+      checkSuccess(Outcome(stepTutorial(model)))
     case LeftButtonEvent if enabled(model).contains(LeftButtonEvent) =>
-      Outcome(stepTutorial(move(model, -1, context.gameTime.running)))
+      checkSuccess(Outcome(stepTutorial(move(model, -1, context.gameTime.running))))
     case KeyboardEvent.KeyDown(Keys.LEFT_ARROW) if enabled(model).contains(LeftButtonEvent) =>
-      Outcome(stepTutorial(move(model, -1, context.gameTime.running)))
+      checkSuccess(Outcome(stepTutorial(move(model, -1, context.gameTime.running))))
     case RightButtonEvent if enabled(model).contains(RightButtonEvent) =>
-      Outcome(stepTutorial(move(model, 1, context.gameTime.running)))
+      checkSuccess(Outcome(stepTutorial(move(model, 1, context.gameTime.running))))
     case KeyboardEvent.KeyDown(Keys.RIGHT_ARROW) if enabled(model).contains(RightButtonEvent) =>
-      Outcome(stepTutorial(move(model, 1, context.gameTime.running)))
+      checkSuccess(Outcome(stepTutorial(move(model, 1, context.gameTime.running))))
     case ExtendButtonEvent if enabled(model).contains(ExtendButtonEvent) =>
-      if (!model.extended) Outcome(stepTutorial(extend(model, context.gameTime.running)))
+      if (!model.extended) checkSuccess(Outcome(stepTutorial(extend(model, context.gameTime.running))))
       else Outcome(stepTutorial(unextend(model, context.gameTime.running)))
     case KeyboardEvent.KeyDown(Keys.UP_ARROW) if enabled(model).contains(ExtendButtonEvent) =>
-      Outcome(stepTutorial(extend(model, context.gameTime.running)))
+      checkSuccess(Outcome(stepTutorial(extend(model, context.gameTime.running))))
     case KeyboardEvent.KeyDown(Keys.DOWN_ARROW) if enabled(model).contains(ExtendButtonEvent) =>
       Outcome(stepTutorial(unextend(model, context.gameTime.running)))
     case BackButtonEvent if enabled(model).contains(BackButtonEvent) =>
@@ -51,6 +51,10 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
       Outcome(stepTutorial(play(model.maze, model.tutorial, model.highlight)))
     case _ => Outcome(model)
   }
+
+  def checkSuccess(outcome: Outcome[PlayModel]): Outcome[PlayModel] =
+    if (outcome.state.status == Won) outcome.addGlobalEvents(SceneEvent.JumpTo(SuccessScene.name))
+    else outcome
 
   def updateViewModel(
       context: FrameContext[StartupData],
@@ -97,6 +101,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
             Text(message, horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
             drawControls
           )
+
       }
     if (model.tutorial.isEmpty)
       base

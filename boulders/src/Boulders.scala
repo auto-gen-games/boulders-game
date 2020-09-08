@@ -36,7 +36,7 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
 
   /** Three scenes: start screen, levels choice, game play screen */
   def scenes(bootData: GameViewport): NonEmptyList[Scene[StartupData, Model, ViewModel]] =
-    NonEmptyList(StartScene, LevelsScene, PlayScene)
+    NonEmptyList(StartScene, LevelsScene, PlayScene, SuccessScene)
 
   def initialScene(bootData: GameViewport): Option[SceneName] =
     Some(StartScene.name)
@@ -68,11 +68,15 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
       createButton("control-arrows", rightControlPosition, RightButtonEvent, row = 2)
     val backButton: Button =
       createButton("back-button", backBoxPosition, BackButtonEvent)
+    val forwardButton: Button =
+      createButton("back-button", forwardBoxPosition, ForwardButtonEvent, flipped = true)
     val replayButton: Button =
       createButton("replay-button", replayBoxPosition, ReplayButtonEvent)
     val playSceneButtons: List[Button] =
       List(leftButton, extendButton, rightButton, backButton, replayButton)
+    val successSceneButtons: List[Button] =
+      List(forwardButton, backButton, replayButton)
 
-    ViewModel(levelButtons(model.levels.size), playSceneButtons)
+    ViewModel(levelButtons(model.levels.size), playSceneButtons, successSceneButtons)
   }
 }
