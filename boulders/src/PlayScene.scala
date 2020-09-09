@@ -10,18 +10,18 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   type SceneModel     = PlayModel
   type SceneViewModel = ViewModel
 
-  val name: SceneName                           = SceneName("play scene")
-  val modelLens: Lens[Model, PlayModel]         = Model.playLens
-  val viewModelLens: Lens[ViewModel, ViewModel] = Lens.keepLatest
-  val eventFilters: EventFilters                = EventFilters.Default
-  val subSystems: Set[SubSystem]                = Set()
+  val name: SceneName                                = SceneName("play scene")
+  val modelLens: Lens[Model, SceneModel]             = Model.playLens
+  val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.keepLatest
+  val eventFilters: EventFilters                     = EventFilters.Default
+  val subSystems: Set[SubSystem]                     = Set()
 
   // The footer instructions
   val instructionLine1 = "Move: Arrow keys / buttons above"
 
-  def updateModel(context: FrameContext[StartupData], model: PlayModel): GlobalEvent => Outcome[PlayModel] = {
+  def updateModel(context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case FrameTick =>
-      Outcome(updateMovement(model, context.gameTime.running)) //.copy (highlight = model.highlight.play))
+      Outcome(updateMovement(model, context.gameTime.running))
     case Click(_, _) if enabled(model).contains(SpaceContinueEvent) =>
       Outcome(stepTutorial(model))
     case KeyboardEvent.KeyUp(Keys.SPACE) if enabled(model).contains(SpaceContinueEvent) =>
@@ -46,9 +46,9 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
     case KeyboardEvent.KeyUp(Keys.ESCAPE) if enabled(model).contains(BackButtonEvent) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case ReplayButtonEvent if enabled(model).contains(ReplayButtonEvent) =>
-      Outcome(stepTutorial(play(model.maze, model.tutorial, model.highlight)))
+      Outcome(stepTutorial(play(model.maze, model.tutorial, context.startUpData.highlight)))
     case KeyboardEvent.KeyUp(Keys.KEY_R) if enabled(model).contains(ReplayButtonEvent) =>
-      Outcome(stepTutorial(play(model.maze, model.tutorial, model.highlight)))
+      Outcome(stepTutorial(play(model.maze, model.tutorial, context.startUpData.highlight)))
     case _ => Outcome(model)
   }
 
@@ -58,7 +58,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
 
   def updateViewModel(
       context: FrameContext[StartupData],
-      gameModel: PlayModel,
+      gameModel: SceneModel,
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = {
     case FrameTick =>
@@ -72,7 +72,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   /** The screen either presents the game state if play status is Playing, or a message and control buttons if
     * the player has won or lost.
     */
-  def present(context: FrameContext[StartupData], model: PlayModel, viewModel: SceneViewModel): SceneUpdateFragment = {
+  def present(context: FrameContext[StartupData], model: SceneModel, viewModel: SceneViewModel): SceneUpdateFragment = {
     val drawControls = Group(viewModel.playSceneButtons.map(_.draw))
     val base =
       if (model.status == Playing || model.playerMoves.nonEmpty || model.boulderMoves.nonEmpty)
@@ -110,7 +110,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
         )
     else
       base
-        .addGameLayerNodes(placeIndicator(model.tutorial.head.indicator, model, model.highlight).toList)
+        .addGameLayerNodes(placeIndicator(model.tutorial.head.indicator, model, context.startUpData.highlight).toList)
         .addGameLayerNodes(
           GameAssets.tutorialBox.moveTo(tutorialGuideBoxPosition),
           Text(

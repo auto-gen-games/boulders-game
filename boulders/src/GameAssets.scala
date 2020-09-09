@@ -1,5 +1,4 @@
 import Settings._
-import ViewLogic.levelButtonPosition
 import indigo._
 import indigo.json.Json
 import indigo.platform.assets.AssetCollection
@@ -20,6 +19,7 @@ object GameAssets {
     "player-sprite",
     "player-top",
     "right-push",
+    "tick",
     "tutorial-box",
     "wall"
   )

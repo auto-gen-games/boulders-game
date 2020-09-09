@@ -14,9 +14,9 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
     Model(
       startupData.tutorial,
       startupData.levels,
-      PlayModel.play(startupData.tutorial, startupData.guide, startupData.highlightAnimation),
+      PlayModel.play(startupData.tutorial, startupData.guide, startupData.highlight),
       startupData.guide,
-      startupData.highlightAnimation
+      startupData.highlight
     )
 
   /** Copied from the Snake demo, loading assets and the viewport. */
