@@ -46,9 +46,9 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
     case KeyboardEvent.KeyUp(Keys.ESCAPE) if enabled(model).contains(BackButtonEvent) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case ReplayButtonEvent if enabled(model).contains(ReplayButtonEvent) =>
-      Outcome(stepTutorial(play(model.maze, model.tutorial, context.startUpData.highlight)))
+      Outcome(stepTutorial(play(model.maze, model.tutorial)))
     case KeyboardEvent.KeyUp(Keys.KEY_R) if enabled(model).contains(ReplayButtonEvent) =>
-      Outcome(stepTutorial(play(model.maze, model.tutorial, context.startUpData.highlight)))
+      Outcome(stepTutorial(play(model.maze, model.tutorial)))
     case _ => Outcome(model)
   }
 

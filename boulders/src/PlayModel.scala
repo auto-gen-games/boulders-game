@@ -39,7 +39,7 @@ object PlayModel {
   /** Creates a play model from the given level, with the player and boulders in their start positions,
     * the player not extended, the diamond not collected, and the play status as currently playing (not lost or won).
     */
-  def play(maze: Level, tutorial: Vector[TutorialGuideLine], highlight: Sprite): PlayModel =
+  def play(maze: Level, tutorial: Vector[TutorialGuideLine]): PlayModel =
     PlayModel(
       maze,
       maze.start,
@@ -52,7 +52,7 @@ object PlayModel {
       tutorial
     )
 
-  def play(maze: Level, highlight: Sprite): PlayModel = play(maze, Vector.empty, highlight)
+  def play(maze: Level): PlayModel = play(maze, Vector.empty)
 
   /** Returns true if the player or boulder could move from the given position left or right (as given by dx)
     * and considering whether it can push a boulder in doing so.

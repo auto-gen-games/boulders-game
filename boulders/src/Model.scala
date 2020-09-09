@@ -2,10 +2,9 @@ import indigo.scenes.Lens
 import indigo.shared.formats.SpriteAndAnimations
 import indigo.shared.scenegraph.Sprite
 
-/** The overall model for the game is the set of levels and the current play grid. */
-final case class Model (tutorial: Level, levels: Vector[Level], playModel: PlayModel,
-                        guide: Vector[TutorialGuideLine], highlight: Sprite)
+/** The overall model for the game is the current play grid. */
+final case class Model(playModel: PlayModel)
 
 object Model {
-  val playLens: Lens[Model, PlayModel] = Lens (_.playModel, (m, v) => m.copy (playModel = v))
+  val playLens: Lens[Model, PlayModel] = Lens(_.playModel, (m, v) => m.copy(playModel = v))
 }

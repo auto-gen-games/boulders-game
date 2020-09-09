@@ -20,17 +20,27 @@ object SuccessScene extends Scene[StartupData, Model, ViewModel] {
     case KeyboardEvent.KeyUp(Keys.ESCAPE) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case ReplayButtonEvent =>
-      Outcome(playLens.set(model, play(model.playModel.maze, model.highlight)))
+      Outcome(playLens.set(model, play(model.playModel.maze)))
     case KeyboardEvent.KeyUp(Keys.KEY_R) =>
-      Outcome(playLens.set(model, play(model.playModel.maze, model.highlight)))
+      Outcome(playLens.set(model, play(model.playModel.maze)))
     case ForwardButtonEvent =>
       Outcome(
-        playLens.set(model, play(model.levels((model.playModel.maze.number + 1) % model.levels.size), model.highlight))
+        playLens.set(
+          model,
+          play(
+            context.startUpData.levels((model.playModel.maze.number + 1) % context.startUpData.levels.size)
+          )
+        )
       )
         .addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))
     case KeyboardEvent.KeyUp(Keys.SPACE) =>
       Outcome(
-        playLens.set(model, play(model.levels((model.playModel.maze.number + 1) % model.levels.size), model.highlight))
+        playLens.set(
+          model,
+          play(
+            context.startUpData.levels((model.playModel.maze.number + 1) % context.startUpData.levels.size)
+          )
+        )
       )
         .addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))
     case _ => Outcome(model)

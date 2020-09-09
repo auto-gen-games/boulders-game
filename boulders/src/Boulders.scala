@@ -12,11 +12,7 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
   /** The initial game model contains the loaded levels and starts with the tutorial level. */
   def initialModel(startupData: StartupData): Model =
     Model(
-      startupData.tutorial,
-      startupData.levels,
-      PlayModel.play(startupData.tutorial, startupData.guide, startupData.highlight),
-      startupData.guide,
-      startupData.highlight
+      PlayModel.play(startupData.tutorial, startupData.guide)
     )
 
   /** Copied from the Snake demo, loading assets and the viewport. */
@@ -77,6 +73,6 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
     val successSceneButtons: List[Button] =
       List(forwardButton, backButton, replayButton)
 
-    ViewModel(levelButtons(model.levels.size), playSceneButtons, successSceneButtons)
+    ViewModel(levelButtons(startupData.levels.size), playSceneButtons, successSceneButtons)
   }
 }
