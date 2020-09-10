@@ -4,7 +4,7 @@ import Settings._
 import indigo._
 import indigo.scenes._
 
-object SuccessScene extends Scene[StartupData, Model, ViewModel] {
+object SuccessScene extends Scene[ReferenceData, Model, ViewModel] {
   type SceneModel     = Model
   type SceneViewModel = ViewModel
 
@@ -14,7 +14,7 @@ object SuccessScene extends Scene[StartupData, Model, ViewModel] {
   val eventFilters: EventFilters                     = EventFilters.Default
   val subSystems: Set[SubSystem]                     = Set.empty
 
-  def updateModel(context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
+  def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case BackButtonEvent =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case KeyboardEvent.KeyUp(Keys.ESCAPE) =>
@@ -47,7 +47,7 @@ object SuccessScene extends Scene[StartupData, Model, ViewModel] {
   }
 
   def updateViewModel(
-      context: FrameContext[StartupData],
+      context: FrameContext[ReferenceData],
       model: SceneModel,
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = {
@@ -60,7 +60,7 @@ object SuccessScene extends Scene[StartupData, Model, ViewModel] {
   }
 
   override def present(
-      context: FrameContext[StartupData],
+      context: FrameContext[ReferenceData],
       model: SceneModel,
       viewModel: SceneViewModel
   ): SceneUpdateFragment =

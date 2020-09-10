@@ -81,6 +81,7 @@ object GameAssets {
   val diamond         = graphic("diamond")
   val exit            = graphic("exit")
   val tutorialBox     = graphic("tutorial-box", 256, 64)
+  val tick            = graphic("tick")
 
   def loadAnimation(
       assetCollection: AssetCollection,

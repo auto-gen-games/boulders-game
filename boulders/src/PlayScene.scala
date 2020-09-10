@@ -1,3 +1,4 @@
+import Model.completedLens
 import PlayModel._
 import Settings._
 import ViewLogic._
@@ -6,7 +7,7 @@ import indigo.scenes._
 import indigo.shared.events.MouseEvent.Click
 
 /** The main gameplay scene, a grid with a maze level and a player on it. */
-object PlayScene extends Scene[StartupData, Model, ViewModel] {
+object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
   type SceneModel     = PlayModel
   type SceneViewModel = ViewModel
 
@@ -19,7 +20,7 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   // The footer instructions
   val instructionLine1 = "Move: Arrow keys / buttons above"
 
-  def updateModel(context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
+  def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case FrameTick =>
       Outcome(updateMovement(model, context.gameTime.running))
     case Click(_, _) if enabled(model).contains(SpaceContinueEvent) =>
@@ -53,11 +54,15 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   }
 
   def checkSuccess(outcome: Outcome[PlayModel]): Outcome[PlayModel] =
-    if (outcome.state.status == Won) outcome.addGlobalEvents(SceneEvent.JumpTo(SuccessScene.name))
+    if (outcome.state.status == Won)
+      outcome.addGlobalEvents(
+        ModifyEvent[Model, Set[Int]](completedLens, _ + outcome.state.maze.number),
+        SceneEvent.JumpTo(SuccessScene.name)
+      )
     else outcome
 
   def updateViewModel(
-      context: FrameContext[StartupData],
+      context: FrameContext[ReferenceData],
       gameModel: SceneModel,
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = {
@@ -72,7 +77,11 @@ object PlayScene extends Scene[StartupData, Model, ViewModel] {
   /** The screen either presents the game state if play status is Playing, or a message and control buttons if
     * the player has won or lost.
     */
-  def present(context: FrameContext[StartupData], model: SceneModel, viewModel: SceneViewModel): SceneUpdateFragment = {
+  def present(
+      context: FrameContext[ReferenceData],
+      model: SceneModel,
+      viewModel: SceneViewModel
+  ): SceneUpdateFragment = {
     val drawControls = Group(viewModel.playSceneButtons.map(_.draw))
     val base =
       if (model.status == Playing || model.playerMoves.nonEmpty || model.boulderMoves.nonEmpty)

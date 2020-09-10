@@ -1,12 +1,13 @@
 import indigo._
 import indigo.scenes._
+import GameAssets.{fontKey, tick}
 import Model.playLens
 import PlayModel.play
 import Settings._
 import ViewLogic._
 
 /** The level selection page. */
-object LevelsScene extends Scene[StartupData, Model, ViewModel] {
+object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
   type SceneModel     = Model
   type SceneViewModel = ViewModel
 
@@ -16,7 +17,7 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
   val eventFilters: EventFilters                     = EventFilters.Default
   val subSystems: Set[SubSystem]                     = Set()
 
-  def updateModel(context: FrameContext[StartupData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
+  def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case TutorialButtonEvent =>
       Outcome(
         playLens.set(
@@ -33,7 +34,7 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
   }
 
   def updateViewModel(
-      context: FrameContext[StartupData],
+      context: FrameContext[ReferenceData],
       model: SceneModel,
       viewModel: SceneViewModel
   ): GlobalEvent => Outcome[SceneViewModel] = {
@@ -46,19 +47,26 @@ object LevelsScene extends Scene[StartupData, Model, ViewModel] {
       Outcome(viewModel)
   }
 
-  def present(context: FrameContext[StartupData], model: SceneModel, viewModel: SceneViewModel): SceneUpdateFragment =
+  def present(context: FrameContext[ReferenceData], model: SceneModel, viewModel: SceneViewModel): SceneUpdateFragment =
     SceneUpdateFragment.empty
       .addUiLayerNodes(
         Group(viewModel.levelSceneButtons.map(_.draw)),
         Group(drawNumbersOnButtons(context.startUpData.levels)),
-        Text("Tutorial", tutorialLevelPosition.x + cellSize + 12, tutorialLevelPosition.y + 10, 1, GameAssets.fontKey),
-        Text("Select level", horizontalCenter, footerStart, 1, GameAssets.fontKey).alignCenter
+        Group(drawTicksOnButtons(context.startUpData.levels, model.completed)),
+        Text("Tutorial", tutorialLevelPosition.x + cellSize + 12, tutorialLevelPosition.y + 10, 1, fontKey),
+        Text("Select level", horizontalCenter, footerStart, 1, fontKey).alignCenter
       )
 
   def drawNumbersOnButtons(levels: Vector[Level]): List[Text] =
     levels.indices.map { n =>
       val position = levelNumberPosition(n)
-      Text((n + 1).toString, position.x, position.y, 1, GameAssets.fontKey)
+      Text((n + 1).toString, position.x, position.y, 1, fontKey)
     }.toList :+
-      Text("T", tutorialLevelPosition.x + 12, tutorialLevelPosition.y + 10, 1, GameAssets.fontKey)
+      Text("T", tutorialLevelPosition.x + 12, tutorialLevelPosition.y + 10, 1, fontKey)
+
+  def drawTicksOnButtons(levels: Vector[Level], completed: Set[Int]): List[Graphic] =
+    levels.indices.flatMap { n =>
+      if (completed.contains(n)) Some(tick.moveTo(levelButtonPosition(n)))
+      else None
+    }.toList
 }

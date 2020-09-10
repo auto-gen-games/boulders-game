@@ -1,4 +1,5 @@
 import GameAssets._
+import PlayModel.play
 import Settings._
 import ViewLogic._
 import indigo._
@@ -7,13 +8,11 @@ import indigoextras.ui.Button
 import scala.scalajs.js.annotation.JSExportTopLevel
 
 @JSExportTopLevel("IndigoGame")
-object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] {
+object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel] {
 
-  /** The initial game model contains the loaded levels and starts with the tutorial level. */
-  def initialModel(startupData: StartupData): Model =
-    Model(
-      PlayModel.play(startupData.tutorial, startupData.guide)
-    )
+  /** The initial game model starts with the tutorial level, and with no levels marked completed. */
+  def initialModel(startupData: ReferenceData): Model =
+    Model(play(startupData.tutorial, startupData.guide), Set.empty)
 
   /** Copied from the Snake demo, loading assets and the viewport. */
   def boot(flags: Map[String, String]): BootResult[GameViewport] = {
@@ -31,8 +30,8 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
   }
 
   /** Three scenes: start screen, levels choice, game play screen */
-  def scenes(bootData: GameViewport): NonEmptyList[Scene[StartupData, Model, ViewModel]] =
-    NonEmptyList(StartScene, LevelsScene, PlayScene, SuccessScene)
+  def scenes(bootData: GameViewport): NonEmptyList[Scene[ReferenceData, Model, ViewModel]] =
+    NonEmptyList(StartScene, LevelsScene, new GlobalisedScene(PlayScene), SuccessScene)
 
   def initialScene(bootData: GameViewport): Option[SceneName] =
     Some(StartScene.name)
@@ -42,20 +41,20 @@ object Boulders extends IndigoGame[GameViewport, StartupData, Model, ViewModel] 
       bootData: GameViewport,
       assetCollection: AssetCollection,
       dice: Dice
-  ): Startup[StartupErrors, StartupData] = {
+  ): Startup[StartupErrors, ReferenceData] = {
     val result = for {
       spriteAnim <- GameAssets.loadAnimation(assetCollection, dice, highlightJSON, highlightBox, Depth(0))
       level      <- assetCollection.findTextDataByName(tutorialSpec).map(Level.levelFromCode(-1, _))
       specs      <- assetCollection.findTextDataByName(levelSpecs).map(Level.decodeLevels)
       guide      <- assetCollection.findTextDataByName(tutorialGuide).map(TutorialGuideLine.loadGuide)
     } yield Startup
-      .Success(StartupData(bootData, level, specs, guide, spriteAnim.sprite))
+      .Success(ReferenceData(bootData, level, specs, guide, spriteAnim.sprite))
       .addAnimations(spriteAnim.animations)
 
     result.getOrElse(Startup.Failure.withErrors("Could not load or parse game data"))
   }
 
-  def initialViewModel(startupData: StartupData, model: Model): ViewModel = {
+  def initialViewModel(startupData: ReferenceData, model: Model): ViewModel = {
     val leftButton: Button =
       createButton("control-arrows", leftControlPosition, LeftButtonEvent, row = 0)
     val extendButton: Button =
