@@ -1,3 +1,4 @@
+import GameAssets.fontKey
 import Model.completedLens
 import PlayModel._
 import Settings._
@@ -82,7 +83,12 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
       model: SceneModel,
       viewModel: SceneViewModel
   ): SceneUpdateFragment = {
-    val drawControls = Group(viewModel.playSceneButtons.map(_.draw))
+    val drawControls =
+      Group(
+        viewModel.playSceneButtons.map(_.draw) :+
+          Text("ESC", backBoxPosition.x + 2, backBoxPosition.y + cellSize, 1, fontKey) :+
+          Text("R", replayBoxPosition.x + 12, replayBoxPosition.y + cellSize, 1, fontKey)
+      )
     val base =
       if (model.status == Playing || model.playerMoves.nonEmpty || model.boulderMoves.nonEmpty)
         SceneUpdateFragment.empty
@@ -99,19 +105,16 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
             Text(instructionLine1, horizontalCenter, footerStart + cellSize, 1, GameAssets.fontKey).alignCenter,
             drawControls
           )
-      else {
-        val message =
-          model.status match {
-            case Lost(reason) => reason
-            case _            => "Success!"
-          }
-        SceneUpdateFragment.empty
-          .addGameLayerNodes(
-            Text(message, horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
-            drawControls
-          )
-
-      }
+      else
+        model.status match {
+          case Lost(reason) =>
+            SceneUpdateFragment.empty
+              .addGameLayerNodes(
+                Text(reason, horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
+                drawControls
+              )
+          case _ => SceneUpdateFragment.empty
+        }
     if (model.tutorial.isEmpty)
       base
         .addGameLayerNodes(
