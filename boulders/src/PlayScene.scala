@@ -1,4 +1,4 @@
-import GameAssets.fontKey
+import GameAssets.{boulder, fontKey}
 import Model.completedLens
 import PlayModel._
 import Settings._
@@ -29,13 +29,13 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
     case KeyboardEvent.KeyUp(Keys.SPACE) if enabled(model).contains(SpaceContinueEvent) =>
       Outcome(stepTutorial(model))
     case LeftButtonEvent if enabled(model).contains(LeftButtonEvent) =>
-      Outcome(stepTutorial(move(model, -1, context.gameTime.running)))
+      addBoulderRoll(Outcome(stepTutorial(move(model, -1, context.gameTime.running))))
     case KeyboardEvent.KeyDown(Keys.LEFT_ARROW) if enabled(model).contains(LeftButtonEvent) =>
-      Outcome(stepTutorial(move(model, -1, context.gameTime.running)))
+      addBoulderRoll(Outcome(stepTutorial(move(model, -1, context.gameTime.running))))
     case RightButtonEvent if enabled(model).contains(RightButtonEvent) =>
-      Outcome(stepTutorial(move(model, 1, context.gameTime.running)))
+      addBoulderRoll(Outcome(stepTutorial(move(model, 1, context.gameTime.running))))
     case KeyboardEvent.KeyDown(Keys.RIGHT_ARROW) if enabled(model).contains(RightButtonEvent) =>
-      Outcome(stepTutorial(move(model, 1, context.gameTime.running)))
+      addBoulderRoll(Outcome(stepTutorial(move(model, 1, context.gameTime.running))))
     case ExtendButtonEvent if enabled(model).contains(ExtendButtonEvent) =>
       if (!model.extended) Outcome(stepTutorial(extend(model, context.gameTime.running)))
       else Outcome(stepTutorial(unextend(model, context.gameTime.running)))
@@ -61,6 +61,10 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
         SceneEvent.JumpTo(SuccessScene.name)
       )
     else outcome
+
+  def addBoulderRoll(outcome: Outcome[PlayModel]): Outcome[PlayModel] =
+    if (outcome.state.boulderMoves.isEmpty) outcome
+    else outcome.addGlobalEvents(PlaySound(AssetName("rolling"), Volume.Max))
 
   def updateViewModel(
       context: FrameContext[ReferenceData],
@@ -173,7 +177,15 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
       val stepCompletion = (time - model.boulderMoves.head.started).toDouble / stepTime.toDouble
       val offsetX        = stepCompletion * model.boulderMoves.head.dx
       val offsetY        = stepCompletion * model.boulderMoves.head.dy
-      Group(place(position, model.maze, GameAssets.boulder, offsetX, offsetY))
+      Group(
+        place(
+          position,
+          model.maze,
+          boulder,
+          offsetX,
+          offsetY
+        )
+      )
     }
 
   def drawDiamond(model: PlayModel): Group =

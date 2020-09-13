@@ -34,7 +34,7 @@ object PlayModel {
 
   /** Enable all buttons on the play scene by default */
   val allButtonEvents: Set[PlaySceneButtonEvent] =
-    Set(BackButtonEvent, ReplayButtonEvent, LeftButtonEvent, RightButtonEvent, ExtendButtonEvent)
+    Set(BackButtonEvent, UndoButtonEvent, ReplayButtonEvent, LeftButtonEvent, RightButtonEvent, ExtendButtonEvent)
 
   /** Creates a play model from the given level, with the player and boulders in their start positions,
     * the player not extended, the diamond not collected, and the play status as currently playing (not lost or won).

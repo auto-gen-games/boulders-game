@@ -67,6 +67,8 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       createButton("back-button", forwardBoxPosition, ForwardButtonEvent, flipped = true)
     val replayButton: Button =
       createButton("replay-button", replayBoxPosition, ReplayButtonEvent)
+    val undoButton: Button =
+      createButton("undo-button", undoBoxPosition, UndoButtonEvent)
     val playSceneButtons: List[Button] =
       List(leftButton, extendButton, rightButton, backButton, replayButton)
     val successSceneButtons: List[Button] =

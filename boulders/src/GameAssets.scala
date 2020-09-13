@@ -23,14 +23,16 @@ object GameAssets {
     "tutorial-box",
     "wall"
   )
-  val buttonFiles = Set("back-button", "control-arrows", "replay-button")
+  val buttonFiles = Set("back-button", "control-arrows", "replay-button", "undo-button")
   val textFiles   = Set("levels", "tutorial-level", "tutorial-guide")
   val jsonFiles   = Set("highlight")
+  val audioFiles  = Set("rolling")
 
   def assets(baseUrl: String): Set[AssetType] =
     imageFiles.map(file => AssetType.Image(AssetName(file), AssetPath(baseUrl + s"assets/$file.png"))) ++
       buttonFiles.map(file => AssetType.Image(AssetName(file), AssetPath(baseUrl + s"assets/$file.png"))) ++
       textFiles.map(file => AssetType.Text(AssetName(file), AssetPath(baseUrl + s"assets/$file.txt"))) ++
+      audioFiles.map(file => AssetType.Audio(AssetName(file), AssetPath(baseUrl + s"assets/$file.mp3"))) ++
       jsonFiles.map(file => AssetType.Text(AssetName(file), AssetPath(baseUrl + s"assets/$file.json")))
 
   val materials: Map[String, Material.Textured] =

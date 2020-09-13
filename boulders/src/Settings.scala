@@ -36,9 +36,9 @@ object Settings {
   /** The number of levels to fit on each row on the levels scene */
   val levelsPerRow: Int = (areaWidth - leftMargin - rightMargin) / levelBoxSize
 
-  val backBoxPosition          = Point(0, halfSize)
-  val infoBoxPosition          = Point(horizontalCenter - cellSize / 2, halfSize)
-  val replayBoxPosition        = Point(areaWidth - cellSize, halfSize)
+  val backBoxPosition          = Point(0, 0)
+  val undoBoxPosition          = Point(horizontalCenter - cellSize / 2, 0)
+  val replayBoxPosition        = Point(areaWidth - cellSize, 0)
   val forwardBoxPosition       = Point(horizontalCenter - cellSize / 2, verticalMiddle + cellSize)
   val leftControlPosition      = Point(horizontalCenter - cellSize * 2, footerStart)
   val extendControlPosition    = Point(horizontalCenter - cellSize / 2, footerStart)
