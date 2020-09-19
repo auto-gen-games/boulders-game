@@ -27,14 +27,7 @@ object ViewLogic {
 
   /** Place the given graphic at the grid positions specified by the given matrix for the given level. */
   def planGraphics(plan: Vector[Vector[Boolean]], maze: Level, graphic: Renderable): List[Renderable] =
-    planToGridPoints(plan).map(place(_, maze, graphic))
-
-  /** Translate the given matrix of whether something is placed at each grid point to a list of grid points. */
-  def planToGridPoints(plan: Vector[Vector[Boolean]]): List[GridPoint] =
-    (for {
-      x <- plan.indices
-      y <- plan.head.indices
-    } yield if (plan(x)(y)) Some(GridPoint(x, y)) else None).flatten.toList
+    GridPoint.planToGridPoints(plan).map(place(_, maze, graphic))
 
   /** Translate the given grid point to a position on the screen. */
   def gridPointToPoint(gridPoint: GridPoint, maze: Level, offsetX: Double = 0.0, offsetY: Double = 0.0): Point =
@@ -72,6 +65,9 @@ object ViewLogic {
     val box = levelButtonPosition(level)
     Point(box.x + numberLeftPos(level + 1), box.y + 10)
   }
+
+  def levelTypeTextPosition(kind: String): Point =
+    moveBy(levelTypesPosition, gameTypes.indexOf(kind) * 64 + 8, 10)
 
   def placeIndicator(indicator: Indicator, model: PlayModel, highlight: Sprite): Option[Sprite] =
     indicator match {

@@ -1,6 +1,6 @@
 import indigo._
 import indigo.scenes._
-import GameAssets.{fontKey, tick}
+import GameAssets.{fontKey, gameTypes, tick}
 import Model.playLens
 import PlayModel.play
 import Settings._
@@ -18,6 +18,8 @@ object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
   val subSystems: Set[SubSystem]                     = Set()
 
   def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
+    case LevelTypeButtonEvent(index) =>
+      Outcome(model.copy(selectedType = gameTypes(index)))
     case TutorialButtonEvent =>
       Outcome(
         playLens.set(
@@ -50,11 +52,18 @@ object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
     SceneUpdateFragment.empty
       .addUiLayerNodes(
         Group(viewModel.levelSceneButtons.draw(model.selectedType)),
+        Group(drawTypeTexts),
         Group(drawNumbersOnButtons(context.startUpData.levels(model.selectedType))),
         Group(drawTicksOnButtons(context.startUpData.levels(model.selectedType), model.completed)),
         Text("Tutorial", tutorialLevelPosition.x + cellSize + 12, tutorialLevelPosition.y + 10, 1, fontKey),
         Text("Select level", horizontalCenter, footerStart, 1, fontKey).alignCenter
       )
+
+  def drawTypeTexts: List[Text] =
+    gameTypes.map { kind =>
+      val position = levelTypeTextPosition(kind)
+      Text(kind, position.x, position.y, 1, fontKey)
+    }
 
   def drawNumbersOnButtons(levels: Vector[Level]): List[Text] =
     levels.indices.map { n =>

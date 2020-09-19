@@ -1,7 +1,7 @@
 import GameAssets._
 import PlayModel.play
 import Settings._
-import ViewLogic.{levelButtons, _}
+import ViewLogic._
 import indigo._
 import indigo.scenes.{Scene, SceneName}
 import indigoextras.ui.Button
@@ -68,14 +68,18 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       createButton("control-arrows", extendControlPosition, ExtendButtonEvent, row = 1)
     val rightButton: Button =
       createButton("control-arrows", rightControlPosition, RightButtonEvent, row = 2)
+    val flipButton: Button =
+      createButton("control-arrows", flipControlPosition, FlipButtonEvent, row = 3)
+    val baseControls: List[Button] =
+      List(leftButton, extendButton, rightButton)
+    val flipControls: List[Button] =
+      List(leftButton, extendButton, rightButton, flipButton)
     val backButton: Button =
       createButton("back-button", backBoxPosition, BackButtonEvent)
     val forwardButton: Button =
       createButton("back-button", forwardBoxPosition, ForwardButtonEvent, flipped = true)
     val replayButton: Button =
       createButton("replay-button", replayBoxPosition, ReplayButtonEvent)
-    val undoButton: Button =
-      createButton("undo-button", undoBoxPosition, UndoButtonEvent)
     val levelNumberButtons: Map[String, List[Button]] =
       gameTypes.map(kind => kind -> levelButtons(startupData.levels(kind).size)).toMap
     val tutorialButtons: Map[String, Button] =
@@ -85,8 +89,8 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
 
     val levelSceneButtons: LevelsSceneButtons =
       LevelsSceneButtons(levelNumberButtons, tutorialButtons, kindButtons)
-    val playSceneButtons: List[Button] =
-      List(leftButton, extendButton, rightButton, backButton, replayButton)
+    val playSceneButtons: PlaySceneButtons =
+      PlaySceneButtons(Map("base" -> baseControls, "flip" -> flipControls), List(backButton, replayButton))
     val successSceneButtons: List[Button] =
       List(forwardButton, backButton, replayButton)
 

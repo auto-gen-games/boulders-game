@@ -24,6 +24,7 @@ final case class PlayModel(
     boulders: Vector[Vector[Boolean]],
     extended: Boolean,
     diamondTaken: Boolean,
+    flipped: Boolean,
     status: PlayStatus,
     playerMoves: Vector[Movement],
     boulderMoves: Vector[Movement],
@@ -33,8 +34,26 @@ final case class PlayModel(
 object PlayModel {
 
   /** Enable all buttons on the play scene by default */
-  val allButtonEvents: Set[PlaySceneButtonEvent] =
-    Set(BackButtonEvent, UndoButtonEvent, ReplayButtonEvent, LeftButtonEvent, RightButtonEvent, ExtendButtonEvent)
+  val allButtonEvents: Map[String, Set[PlaySceneButtonEvent]] =
+    Map(
+      "base" -> Set(
+        BackButtonEvent,
+        UndoButtonEvent,
+        ReplayButtonEvent,
+        LeftButtonEvent,
+        RightButtonEvent,
+        ExtendButtonEvent
+      ),
+      "flip" -> Set(
+        BackButtonEvent,
+        UndoButtonEvent,
+        ReplayButtonEvent,
+        LeftButtonEvent,
+        RightButtonEvent,
+        ExtendButtonEvent,
+        FlipButtonEvent
+      )
+    )
 
   /** Creates a play model from the given level, with the player and boulders in their start positions,
     * the player not extended, the diamond not collected, and the play status as currently playing (not lost or won).
@@ -46,6 +65,7 @@ object PlayModel {
       maze.boulders,
       extended = false,
       diamondTaken = false,
+      flipped = false,
       status = Playing,
       playerMoves = Vector.empty,
       boulderMoves = Vector.empty,
@@ -107,6 +127,26 @@ object PlayModel {
       boulderFall(moveBoulder(model, model.position, dx, 0, started), model.position.moveBy(dx, 0), started + stepTime)
     else
       model
+
+  def flip(game: PlayModel, started: Seconds): PlayModel =
+    if (game.flipped) game
+    else {
+      val flipped = game.copy(
+        maze = Level.flipped(game.maze),
+        position = Level.flipPosition(game.position, game.maze),
+        boulders = Matrix.flipped(game.boulders),
+        extended = false,
+        flipped = true
+      )
+      val fromLowest: List[GridPoint] =
+        GridPoint.planToGridPoints(flipped.boulders).sortBy(_.y).reverse
+      playerFall(
+        fromLowest.foldLeft(flipped) {
+          case (model, boulder) => boulderFall(model, boulder, started)
+        },
+        started
+      )
+    }
 
   /** Moves the player down until it reaches a supporting floor or boulder. */
   @tailrec
@@ -194,6 +234,8 @@ object PlayModel {
       model.copy(status = Lost("Diamond crushed by boulder!"))
     else if (model.maze.exit == boulder)
       model.copy(status = Lost("Exit destroyed by boulder!"))
+    else if (model.position == boulder)
+      model.copy(status = Lost("Player squashed by boulder!"))
     else model
 
   /** Checks whether the time has completed for the first movement steps, and removes them if so */
@@ -223,7 +265,7 @@ object PlayModel {
     model.playerMoves.exists(_.collecting)
 
   def enabled(model: PlayModel): Set[PlaySceneButtonEvent] =
-    if (model.tutorial.isEmpty) allButtonEvents else model.tutorial.head.enabled
+    if (model.tutorial.isEmpty) allButtonEvents(model.maze.kind) else model.tutorial.head.enabled
 
   def stepTutorial(model: PlayModel): PlayModel =
     model.copy(tutorial = model.tutorial.drop(1))

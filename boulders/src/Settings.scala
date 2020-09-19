@@ -39,10 +39,11 @@ object Settings {
   val backBoxPosition          = Point(0, 0)
   val undoBoxPosition          = Point(horizontalCenter - cellSize / 2, 0)
   val replayBoxPosition        = Point(areaWidth - cellSize, 0)
-  val forwardBoxPosition       = Point(horizontalCenter - cellSize / 2, verticalMiddle + cellSize)
+  val forwardBoxPosition       = Point(horizontalCenter - halfSize, verticalMiddle + cellSize)
   val leftControlPosition      = Point(horizontalCenter - cellSize * 2, footerStart)
-  val extendControlPosition    = Point(horizontalCenter - cellSize / 2, footerStart)
+  val extendControlPosition    = Point(horizontalCenter - halfSize, footerStart)
   val rightControlPosition     = Point(horizontalCenter + cellSize, footerStart)
+  val flipControlPosition      = Point(horizontalCenter + cellSize * 2 + halfSize, footerStart)
   val tutorialGuideBoxPosition = Point(cellSize + halfSize, halfSize)
 
   val magnificationLevel: Int = 2

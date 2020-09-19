@@ -1,4 +1,4 @@
-import Matrix._
+import Matrix.{emptyBooleanMatrix, updated}
 
 /** A level specification, from which a game can be started. Each level has a width and height in grid cells,
   * a matrix specifying which cells have walls to the left, a matrix for which cells have floors underneath,
@@ -43,9 +43,18 @@ object Level {
       exit
     )
 
-  /** Returns the area of a level. */
-  def area(maze: Level): Int =
-    maze.width * maze.height
+  def flipPosition(position: GridPoint, level: Level): GridPoint =
+    GridPoint(position.x, level.height - 1 - position.y)
+
+  def flipped(level: Level): Level =
+    level.copy(
+      start = flipPosition(level.start, level),
+      diamond = flipPosition(level.diamond, level),
+      exit = flipPosition(level.exit, level),
+      leftWalls = Matrix.flipped(level.leftWalls),
+      floors = Matrix.cycleUp(Matrix.flipped(level.floors)),
+      boulders = Matrix.flipped(level.boulders)
+    )
 
   /** Returns true if the given position is within the grid for this level. */
   def inBounds(maze: Level, point: GridPoint): Boolean =

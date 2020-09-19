@@ -18,9 +18,6 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
   val eventFilters: EventFilters                     = EventFilters.Default
   val subSystems: Set[SubSystem]                     = Set()
 
-  // The footer instructions
-  val instructionLine1 = "Move: Arrow keys / buttons above"
-
   def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case FrameTick =>
       checkSuccess(Outcome(updateMovement(model, context.gameTime.running)))
@@ -43,14 +40,18 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
       Outcome(stepTutorial(extend(model, context.gameTime.running)))
     case KeyboardEvent.KeyDown(Keys.DOWN_ARROW) if enabled(model).contains(ExtendButtonEvent) =>
       Outcome(stepTutorial(unextend(model, context.gameTime.running)))
+    case FlipButtonEvent if enabled(model).contains(FlipButtonEvent) =>
+      Outcome(stepTutorial(flip(model, context.gameTime.running)))
+    case KeyboardEvent.KeyDown(Keys.KEY_F) if enabled(model).contains(FlipButtonEvent) =>
+      Outcome(stepTutorial(flip(model, context.gameTime.running)))
     case BackButtonEvent if enabled(model).contains(BackButtonEvent) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case KeyboardEvent.KeyUp(Keys.ESCAPE) if enabled(model).contains(BackButtonEvent) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case ReplayButtonEvent if enabled(model).contains(ReplayButtonEvent) =>
-      Outcome(stepTutorial(play(model.maze, model.tutorial)))
+      Outcome(stepTutorial(play(context.startUpData.levels(model.maze.kind)(model.maze.number), model.tutorial)))
     case KeyboardEvent.KeyUp(Keys.KEY_R) if enabled(model).contains(ReplayButtonEvent) =>
-      Outcome(stepTutorial(play(model.maze, model.tutorial)))
+      Outcome(stepTutorial(play(context.startUpData.levels(model.maze.kind)(model.maze.number), model.tutorial)))
     case _ => Outcome(model)
   }
 
@@ -73,8 +74,7 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
   ): GlobalEvent => Outcome[SceneViewModel] = {
     case FrameTick =>
       viewModel.playSceneButtons
-        .map(_.update(context.inputState.mouse))
-        .sequence
+        .update(gameModel.maze.kind, context.inputState.mouse)
         .map(newButtons => viewModel.copy(playSceneButtons = newButtons))
     case _ => Outcome(viewModel)
   }
@@ -89,7 +89,7 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
   ): SceneUpdateFragment = {
     val drawControls =
       Group(
-        viewModel.playSceneButtons.map(_.draw) :+
+        viewModel.playSceneButtons.draw(model.maze.kind) :+
           Text("ESC", backBoxPosition.x + 2, backBoxPosition.y + cellSize, 1, fontKey) :+
           Text("R", replayBoxPosition.x + 12, replayBoxPosition.y + cellSize, 1, fontKey)
       )
@@ -106,7 +106,13 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
             drawDiamond(model),
             Group(planGraphics(staticBoulders(model), model.maze, GameAssets.boulder)),
             drawMovingBoulder(model, context.gameTime.running),
-            Text(instructionLine1, horizontalCenter, footerStart + cellSize, 1, GameAssets.fontKey).alignCenter,
+            Text(
+              controlInstructions(model),
+              horizontalCenter,
+              footerStart + cellSize,
+              1,
+              GameAssets.fontKey
+            ).alignCenter,
             drawControls
           )
       else
@@ -152,6 +158,13 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
           )
         )
   }
+
+  // The footer instructions
+  def controlInstructions(model: PlayModel): String =
+    model.maze.kind match {
+      case "flip" => "Arrow keys and F / buttons above"
+      case _      => "Arrow keys / buttons above"
+    }
 
   def drawPlayer(model: PlayModel, time: Seconds): Group = {
     val position = if (model.playerMoves.isEmpty) (model.position) else model.playerMoves.head.from

@@ -6,7 +6,7 @@ import indigoextras.ui._
 
 case class ViewModel(
     levelSceneButtons: LevelsSceneButtons,
-    playSceneButtons: List[Button],
+    playSceneButtons: PlaySceneButtons,
     successSceneButtons: List[Button]
 )
 
@@ -26,5 +26,19 @@ case class LevelsSceneButtons(
     )(levelButtons, tutorialButtons, typeButton, mouse).map {
       case (newLevelButtons, newTutorialButtons, newTypeButtons) =>
         LevelsSceneButtons(newLevelButtons, newTutorialButtons, newTypeButtons)
+    }
+}
+
+case class PlaySceneButtons(controls: Map[String, List[Button]], navigation: List[Button]) {
+  def draw(gameType: String): List[SceneGraphNodePrimitive] =
+    controls(gameType).map(_.draw) ++ navigation.map(_.draw)
+
+  def update(gameType: String, mouse: Mouse): Outcome[PlaySceneButtons] =
+    update2Tuple(
+      updateMapValue(gameType, updateList(updateButton)),
+      updateList(updateButton)
+    )(controls, navigation, mouse).map {
+      case (newControls, newNavigation) =>
+        PlaySceneButtons(newControls, newNavigation)
     }
 }
