@@ -1,10 +1,11 @@
 import GameAssets._
 import PlayModel.play
 import Settings._
-import ViewLogic._
+import ViewLogic.{levelButtons, _}
 import indigo._
 import indigo.scenes.{Scene, SceneName}
 import indigoextras.ui.Button
+
 import scala.scalajs.js.annotation.JSExportTopLevel
 
 @JSExportTopLevel("IndigoGame")
@@ -12,7 +13,7 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
 
   /** The initial game model starts with the tutorial level, and with no levels marked completed. */
   def initialModel(startupData: ReferenceData): Model =
-    Model(play(startupData.tutorial, startupData.guide), Set.empty)
+    Model("base", play(startupData.tutorial, startupData.guide), Set.empty)
 
   /** Copied from the Snake demo, loading assets and the viewport. */
   def boot(flags: Map[String, String]): BootResult[GameViewport] = {
@@ -42,10 +43,16 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       assetCollection: AssetCollection,
       dice: Dice
   ): Startup[StartupErrors, ReferenceData] = {
+    val specs =
+      levelSpecs
+        .map { case (kind, name) => kind -> assetCollection.findTextDataByName(name).map(Level.decodeLevels(kind, _)) }
+        .filter(_._2.isDefined)
+        .view
+        .mapValues(_.get)
+        .toMap
     val result = for {
       spriteAnim <- GameAssets.loadAnimation(assetCollection, dice, highlightJSON, highlightBox, Depth(0))
-      level      <- assetCollection.findTextDataByName(tutorialSpec).map(Level.levelFromCode(-1, _))
-      specs      <- assetCollection.findTextDataByName(levelSpecs).map(Level.decodeLevels)
+      level      <- assetCollection.findTextDataByName(tutorialSpec).map(Level.levelFromCode("base", -1, _))
       guide      <- assetCollection.findTextDataByName(tutorialGuide).map(TutorialGuideLine.loadGuide)
     } yield Startup
       .Success(ReferenceData(bootData, level, specs, guide, spriteAnim.sprite))
@@ -69,11 +76,20 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       createButton("replay-button", replayBoxPosition, ReplayButtonEvent)
     val undoButton: Button =
       createButton("undo-button", undoBoxPosition, UndoButtonEvent)
+    val levelNumberButtons: Map[String, List[Button]] =
+      gameTypes.map(kind => kind -> levelButtons(startupData.levels(kind).size)).toMap
+    val tutorialButtons: Map[String, Button] =
+      gameTypes.map(kind => kind -> createButton("button-base", tutorialLevelPosition, TutorialButtonEvent)).toMap
+    val kindButtons: RadioButton =
+      gameTypeButton
+
+    val levelSceneButtons: LevelsSceneButtons =
+      LevelsSceneButtons(levelNumberButtons, tutorialButtons, kindButtons)
     val playSceneButtons: List[Button] =
       List(leftButton, extendButton, rightButton, backButton, replayButton)
     val successSceneButtons: List[Button] =
       List(forwardButton, backButton, replayButton)
 
-    ViewModel(levelButtons(startupData.levels.size), playSceneButtons, successSceneButtons)
+    ViewModel(levelSceneButtons, playSceneButtons, successSceneButtons)
   }
 }

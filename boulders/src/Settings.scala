@@ -27,14 +27,14 @@ object Settings {
   val rightStart: Int       = areaWidth - rightMargin
   val footerStart: Int      = areaHeight - footerHeight + 1
 
-  /** The size of the level number boxes on the levels selection scene */
-  val levelBoxSize = cellSize
-
   /** The time that each movement step by the player or a boulder should take */
   val stepTime = Seconds(0.1)
 
   /** The number of levels to fit on each row on the levels scene */
-  val levelsPerRow: Int = (areaWidth - leftMargin - rightMargin) / levelBoxSize
+  val levelTypesPosition    = Point(halfSize, halfSize)
+  val tutorialLevelPosition = Point(halfSize, cellSize * 2)
+  val levelButtonsPosition  = Point(halfSize, cellSize * 3 + halfSize)
+  val levelsPerRow: Int     = (areaWidth - leftMargin - rightMargin) / cellSize
 
   val backBoxPosition          = Point(0, 0)
   val undoBoxPosition          = Point(horizontalCenter - cellSize / 2, 0)
@@ -43,7 +43,6 @@ object Settings {
   val leftControlPosition      = Point(horizontalCenter - cellSize * 2, footerStart)
   val extendControlPosition    = Point(horizontalCenter - cellSize / 2, footerStart)
   val rightControlPosition     = Point(horizontalCenter + cellSize, footerStart)
-  val tutorialLevelPosition    = Point(leftMargin, headerHeight)
   val tutorialGuideBoxPosition = Point(cellSize + halfSize, halfSize)
 
   val magnificationLevel: Int = 2

@@ -6,6 +6,7 @@ import Matrix._
   * positions of the diamond and exit.
   */
 final case class Level(
+    kind: String,
     number: Int,
     width: Int,
     height: Int,
@@ -20,8 +21,17 @@ final case class Level(
 object Level {
 
   /** Creates an empty level of a given width and height, start, diamond and exit positions. */
-  def empty(number: Int, width: Int, height: Int, start: GridPoint, diamond: GridPoint, exit: GridPoint): Level =
+  def empty(
+      kind: String,
+      number: Int,
+      width: Int,
+      height: Int,
+      start: GridPoint,
+      diamond: GridPoint,
+      exit: GridPoint
+  ): Level =
     Level(
+      kind,
       number,
       width,
       height,
@@ -66,11 +76,11 @@ object Level {
     maze.copy(leftWalls = updated(maze.leftWalls, x, y, value = true))
 
   /** Decodes a newline-delimited list of serialised level specs. */
-  def decodeLevels(codes: String): Vector[Level] =
-    codes.split('\n').zipWithIndex.map(ln => levelFromCode(ln._2, ln._1)).toVector
+  def decodeLevels(kind: String, codes: String): Vector[Level] =
+    codes.split('\n').zipWithIndex.map(ln => levelFromCode(kind, ln._2, ln._1)).toVector
 
   /** Decodes a single serialised level spec. */
-  def levelFromCode(number: Int, code: String): Level = {
+  def levelFromCode(kind: String, number: Int, code: String): Level = {
     def coordinate(point: String): GridPoint = {
       val coordinates = point.split(",")
       GridPoint(coordinates(0).toInt, coordinates(1).toInt)
@@ -92,7 +102,7 @@ object Level {
     val player  = coordinate(parts(1))
     val exit    = coordinate(parts(2))
     val diamond = coordinate(parts(3))
-    val empty   = Level.empty(number, width, height, player, diamond, exit)
+    val empty   = Level.empty(kind, number, width, height, player, diamond, exit)
     parts(4).zipWithIndex.foldLeft(empty) {
       case (maze, (code, position)) => setCell(maze, position % width, position / width, code)
     }

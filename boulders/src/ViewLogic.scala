@@ -1,15 +1,29 @@
-import GameAssets.createButton
+import GameAssets.{createButton, createRadio, gameTypes}
 import indigo._
 import Settings._
 import indigoextras.ui.{Button, ButtonAssets}
 
 /** Utility functions for placing graphics on the play scene. */
 object ViewLogic {
+  def moveBy(position: Point, dx: Int, dy: Int): Point =
+    Point(position.x + dx, position.y + dy)
+
   def levelButtons(numberOfLevels: Int): List[Button] =
     (0 until numberOfLevels)
       .map(level => createButton("button-base", levelButtonPosition(level), LevelButtonEvent(level)))
-      .toList :+
-      createButton("button-base", tutorialLevelPosition, TutorialButtonEvent)
+      .toList
+
+  def gameTypeButton: RadioButton = {
+    val positions = gameTypes.indices.map(index => moveBy(levelTypesPosition, index * 64, 0)).toList
+    createRadio(
+      assetName = "type-button",
+      positions = positions,
+      selectionEvent = i => LevelTypeButtonEvent(i),
+      width = 64,
+      height = 32,
+      initialSelection = 0
+    )
+  }
 
   /** Place the given graphic at the grid positions specified by the given matrix for the given level. */
   def planGraphics(plan: Vector[Vector[Boolean]], maze: Level, graphic: Renderable): List[Renderable] =
@@ -50,8 +64,8 @@ object ViewLogic {
   /** Determine level button, where level numbering starts from 0 */
   def levelButtonPosition(level: Int): Point =
     Point(
-      (level % levelsPerRow) * levelBoxSize + leftMargin,
-      (level / levelsPerRow) * levelBoxSize + headerHeight + cellSize + halfSize
+      (level % levelsPerRow) * cellSize + levelButtonsPosition.x,
+      (level / levelsPerRow) * cellSize + levelButtonsPosition.y
     )
 
   def levelNumberPosition(level: Int): Point = {

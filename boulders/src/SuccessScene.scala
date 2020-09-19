@@ -24,27 +24,23 @@ object SuccessScene extends Scene[ReferenceData, Model, ViewModel] {
     case KeyboardEvent.KeyUp(Keys.KEY_R) =>
       Outcome(playLens.set(model, play(model.playModel.maze)))
     case ForwardButtonEvent =>
-      Outcome(
-        playLens.set(
-          model,
-          play(
-            context.startUpData.levels((model.playModel.maze.number + 1) % context.startUpData.levels.size)
-          )
-        )
-      )
+      Outcome(goToNextLevel(model, context.startUpData))
         .addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))
     case KeyboardEvent.KeyUp(Keys.SPACE) =>
-      Outcome(
-        playLens.set(
-          model,
-          play(
-            context.startUpData.levels((model.playModel.maze.number + 1) % context.startUpData.levels.size)
-          )
-        )
-      )
+      Outcome(goToNextLevel(model, context.startUpData))
         .addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))
     case _ => Outcome(model)
   }
+
+  def goToNextLevel(model: Model, referenceData: ReferenceData): Model =
+    playLens.set(
+      model,
+      play(
+        referenceData.levels(model.playModel.maze.kind)(
+          (model.playModel.maze.number + 1) % referenceData.levels.size
+        )
+      )
+    )
 
   def updateViewModel(
       context: FrameContext[ReferenceData],

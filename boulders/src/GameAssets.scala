@@ -23,8 +23,8 @@ object GameAssets {
     "tutorial-box",
     "wall"
   )
-  val buttonFiles = Set("back-button", "control-arrows", "replay-button", "undo-button")
-  val textFiles   = Set("levels", "tutorial-level", "tutorial-guide")
+  val buttonFiles = Set("back-button", "control-arrows", "replay-button", "undo-button", "type-button")
+  val textFiles   = Set("levels-base", "levels-flip", "levels-pipe", "tutorial-level", "tutorial-guide")
   val jsonFiles   = Set("highlight")
   val audioFiles  = Set("rolling")
 
@@ -47,23 +47,49 @@ object GameAssets {
       position: Point,
       buttonEvent: GlobalEvent,
       row: Int = 0,
-      size: Int = cellSize,
+      width: Int = cellSize,
+      height: Int = cellSize,
       flipped: Boolean = false
   ): Button = {
     val material = Material.Textured(AssetName(assetName))
     val buttonAssets = ButtonAssets(
-      up = Graphic(0, 0, size, size, 2, material).withCrop(0, row * size, size, size).flipHorizontal(flipped),
-      over = Graphic(0, 0, size, size, 2, material).withCrop(size, row * size, cellSize, size).flipHorizontal(flipped),
-      down = Graphic(0, 0, size, size, 2, material).withCrop(size * 2, row * size, size, size).flipHorizontal(flipped)
+      up = Graphic(0, 0, width, height, 2, material).withCrop(0, row * height, width, height).flipHorizontal(flipped),
+      over =
+        Graphic(0, 0, width, height, 2, material).withCrop(width, row * height, width, height).flipHorizontal(flipped),
+      down = Graphic(0, 0, width, height, 2, material)
+        .withCrop(width * 2, row * height, width, height)
+        .flipHorizontal(flipped)
     )
     Button(
       buttonAssets = buttonAssets,
-      bounds = Rectangle(position.x, position.y, cellSize, cellSize),
+      bounds = Rectangle(position.x, position.y, width, height),
       depth = Depth(2)
     ).withUpAction(List(buttonEvent))
   }
 
-  val levelSpecs    = AssetName("levels")
+  def createRadio(
+      assetName: String,
+      row: Int = 0,
+      positions: List[Point],
+      width: Int,
+      height: Int,
+      selectionEvent: Int => GlobalEvent,
+      initialSelection: Int
+  ): RadioButton = {
+    val material = Material.Textured(AssetName(assetName))
+    val buttonAssets = ButtonAssets(
+      up = Graphic(0, 0, width, height, 2, material).withCrop(0, row * height, width, height),
+      over = Graphic(0, 0, width, height, 2, material).withCrop(width, row * height, width, height),
+      down = Graphic(0, 0, width, height, 2, material)
+        .withCrop(width * 2, row * height, width, height)
+    )
+    RadioButton(buttonAssets, positions, width, height, Depth(2), Some(initialSelection))
+      .withSelectedAction(index => List(selectionEvent(index)))
+  }
+
+  val gameTypes: List[String]            = List("base", "flip", "pipe")
+  val levelSpecs: Map[String, AssetName] = gameTypes.map(kind => kind -> AssetName(s"levels-$kind")).toMap
+
   val tutorialSpec  = AssetName("tutorial-level")
   val tutorialGuide = AssetName("tutorial-guide")
   val highlightBox  = AssetName("highlight-sheet")

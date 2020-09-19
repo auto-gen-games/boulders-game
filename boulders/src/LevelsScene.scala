@@ -27,7 +27,7 @@ object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
       )
         .addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))
     case LevelButtonEvent(level) =>
-      Outcome(playLens.set(model, play(context.startUpData.levels(level))))
+      Outcome(playLens.set(model, play(context.startUpData.levels(model.selectedType)(level))))
         .addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))
     case _ =>
       Outcome(model)
@@ -40,8 +40,7 @@ object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
   ): GlobalEvent => Outcome[SceneViewModel] = {
     case FrameTick =>
       viewModel.levelSceneButtons
-        .map(_.update(context.inputState.mouse))
-        .sequence
+        .update(model.selectedType, context.inputState.mouse)
         .map(newButtons => viewModel.copy(levelSceneButtons = newButtons))
     case _ =>
       Outcome(viewModel)
@@ -50,9 +49,9 @@ object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
   def present(context: FrameContext[ReferenceData], model: SceneModel, viewModel: SceneViewModel): SceneUpdateFragment =
     SceneUpdateFragment.empty
       .addUiLayerNodes(
-        Group(viewModel.levelSceneButtons.map(_.draw)),
-        Group(drawNumbersOnButtons(context.startUpData.levels)),
-        Group(drawTicksOnButtons(context.startUpData.levels, model.completed)),
+        Group(viewModel.levelSceneButtons.draw(model.selectedType)),
+        Group(drawNumbersOnButtons(context.startUpData.levels(model.selectedType))),
+        Group(drawTicksOnButtons(context.startUpData.levels(model.selectedType), model.completed)),
         Text("Tutorial", tutorialLevelPosition.x + cellSize + 12, tutorialLevelPosition.y + 10, 1, fontKey),
         Text("Select level", horizontalCenter, footerStart, 1, fontKey).alignCenter
       )
