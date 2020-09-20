@@ -27,7 +27,7 @@ final case class PlayModel(
     flipped: Boolean,
     status: PlayStatus,
     playerMoves: Vector[Movement],
-    boulderMoves: Vector[Movement],
+    boulderMoves: Vector[Vector[Movement]],
     tutorial: Vector[TutorialGuideLine]
 )
 
@@ -219,12 +219,20 @@ object PlayModel {
     */
   def moveBoulder(model: PlayModel, position: GridPoint, dx: Int, dy: Int, started: Seconds): PlayModel =
     squash(
-      setBoulder(setBoulder(model, position, false), position.moveBy(dx, dy), true).copy(boulderMoves =
-        model.boulderMoves :+
-          Movement(position, dx, dy, false, started, GameAssets.boulder)
+      recordBoulderMovement(
+        setBoulder(setBoulder(model, position, false), position.moveBy(dx, dy), true),
+        Movement(position, dx, dy, false, started, GameAssets.boulder)
       ),
       position.moveBy(dx, dy)
     )
+
+  def recordBoulderMovement(model: PlayModel, movement: Movement): PlayModel = {
+    val trace = movingBoulderDestinations(model).indexOf(movement.from)
+    if (trace >= 0)
+      model.copy(boulderMoves = model.boulderMoves.updated(trace, model.boulderMoves(trace) :+ movement))
+    else
+      model.copy(boulderMoves = model.boulderMoves :+ Vector(movement))
+  }
 
   /** Checks whether a boulder being at the given position squashes the diamond or exit, changing play status
     * to lost if so.
@@ -244,22 +252,22 @@ object PlayModel {
       if (model.playerMoves.isEmpty || model.playerMoves.head.started + stepTime >= time)
         model.playerMoves
       else model.playerMoves.tail
-    val forBoulder =
-      if (model.boulderMoves.isEmpty || model.boulderMoves.head.started + stepTime >= time)
-        model.boulderMoves
-      else model.boulderMoves.tail
-    model.copy(playerMoves = forPlayer, boulderMoves = forBoulder)
+    val forBoulders =
+      model.boulderMoves.flatMap { mover =>
+        if (mover.head.started + stepTime >= time) Some(mover)
+        else if (mover.size < 2) None
+        else Some(mover.tail)
+      }
+    model.copy(playerMoves = forPlayer, boulderMoves = forBoulders)
   }
 
   def staticBoulders(model: PlayModel): Vector[Vector[Boolean]] =
-    movingBoulderDestination(model) match {
-      case None          => model.boulders
-      case Some(boulder) => Matrix.updated(model.boulders, boulder.x, boulder.y, false)
+    movingBoulderDestinations(model).foldLeft(model.boulders) {
+      case (shown, moving) => Matrix.updated(shown, moving.x, moving.y, false)
     }
 
-  def movingBoulderDestination(model: PlayModel): Option[GridPoint] =
-    if (model.boulderMoves.isEmpty) None
-    else Some(model.boulderMoves.last.from.moveBy(model.boulderMoves.last.dx, model.boulderMoves.last.dy))
+  def movingBoulderDestinations(model: PlayModel): Vector[GridPoint] =
+    model.boulderMoves.map(mover => mover.last.from.moveBy(mover.last.dx, mover.last.dy))
 
   def reachingDiamond(model: PlayModel): Boolean =
     model.playerMoves.exists(_.collecting)

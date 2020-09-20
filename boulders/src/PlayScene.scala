@@ -105,7 +105,7 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
             drawPlayer(model, context.gameTime.running),
             drawDiamond(model),
             Group(planGraphics(staticBoulders(model), model.maze, GameAssets.boulder)),
-            drawMovingBoulder(model, context.gameTime.running),
+            drawMovingBoulders(model, context.gameTime.running),
             Text(
               controlInstructions(model),
               horizontalCenter,
@@ -183,23 +183,21 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
       )
   }
 
-  def drawMovingBoulder(model: PlayModel, time: Seconds): Group =
-    if (model.boulderMoves.isEmpty) Group(List.empty)
-    else {
-      val position       = model.boulderMoves.head.from
-      val stepCompletion = (time - model.boulderMoves.head.started).toDouble / stepTime.toDouble
-      val offsetX        = stepCompletion * model.boulderMoves.head.dx
-      val offsetY        = stepCompletion * model.boulderMoves.head.dy
-      Group(
-        place(
-          position,
-          model.maze,
-          boulder,
-          offsetX,
-          offsetY
-        )
+  def drawMovingBoulders(model: PlayModel, time: Seconds): Group =
+    Group(model.boulderMoves.map { mover =>
+      val position       = mover.head.from
+      val stepCompletion = (time - mover.head.started).toDouble / stepTime.toDouble
+      val offsetX        = stepCompletion * mover.head.dx
+      val offsetY        = stepCompletion * mover.head.dy
+
+      place(
+        position,
+        model.maze,
+        boulder,
+        offsetX,
+        offsetY
       )
-    }
+    }.toList)
 
   def drawDiamond(model: PlayModel): Group =
     if (model.diamondTaken && !reachingDiamond(model)) Group(List.empty)
