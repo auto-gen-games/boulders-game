@@ -12,8 +12,10 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel] {
 
   /** The initial game model starts with the tutorial level, and with no levels marked completed. */
-  def initialModel(startupData: ReferenceData): Model =
-    Model("base", play(startupData.tutorial, startupData.guide), Set.empty)
+  def initialModel(startupData: ReferenceData): Model = {
+    val completedLevels = gameTypes.map(kind => (kind -> Set[Int]())).toMap
+    Model("base", play(startupData.tutorial, startupData.guide), completedLevels)
+  }
 
   /** Copied from the Snake demo, loading assets and the viewport. */
   def boot(flags: Map[String, String]): BootResult[GameViewport] = {

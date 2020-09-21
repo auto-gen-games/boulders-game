@@ -54,7 +54,7 @@ object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
         Group(viewModel.levelSceneButtons.draw(model.selectedType)),
         Group(drawTypeTexts),
         Group(drawNumbersOnButtons(context.startUpData.levels(model.selectedType))),
-        Group(drawTicksOnButtons(context.startUpData.levels(model.selectedType), model.completed)),
+        Group(drawTicksOnButtons(context.startUpData.levels(model.selectedType), model.completed(model.selectedType))),
         Text("Tutorial", tutorialLevelPosition.x + cellSize + 12, tutorialLevelPosition.y + 10, 1, fontKey),
         Text("Select level", horizontalCenter, footerStart, 1, fontKey).alignCenter
       )

@@ -87,7 +87,7 @@ object GameAssets {
       .withSelectedAction(index => List(selectionEvent(index)))
   }
 
-  val gameTypes: List[String]            = List("base", "flip", "pipe")
+  val gameTypes: List[String]            = List("base", "flip")
   val levelSpecs: Map[String, AssetName] = gameTypes.map(kind => kind -> AssetName(s"levels-$kind")).toMap
 
   val tutorialSpec  = AssetName("tutorial-level")
