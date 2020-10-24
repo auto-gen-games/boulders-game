@@ -2,7 +2,7 @@ import Settings._
 import indigo._
 import indigo.json.Json
 import indigo.platform.assets.AssetCollection
-import indigoextras.ui.{Button, ButtonAssets}
+import indigoextras.ui.{Button, ButtonAssets, RadioButton, RadioButtonGroup}
 
 /** Assets: graphics, level specs (text), and font (copied from Snake demo) */
 object GameAssets {
@@ -64,7 +64,7 @@ object GameAssets {
       buttonAssets = buttonAssets,
       bounds = Rectangle(position.x, position.y, width, height),
       depth = Depth(2)
-    ).withUpAction(List(buttonEvent))
+    ).withUpActions(buttonEvent)
   }
 
   def createRadio(
@@ -75,7 +75,7 @@ object GameAssets {
       height: Int,
       selectionEvent: Int => GlobalEvent,
       initialSelection: Int
-  ): RadioButton = {
+  ): RadioButtonGroup = {
     val material = Material.Textured(AssetName(assetName))
     val buttonAssets = ButtonAssets(
       up = Graphic(0, 0, width, height, 2, material).withCrop(0, row * height, width, height),
@@ -83,8 +83,15 @@ object GameAssets {
       down = Graphic(0, 0, width, height, 2, material)
         .withCrop(width * 2, row * height, width, height)
     )
-    RadioButton(buttonAssets, positions, width, height, Depth(2), Some(initialSelection))
-      .withSelectedAction(index => List(selectionEvent(index)))
+    val buttons = positions.map(pos => RadioButton(pos)).zipWithIndex.map {
+      case (button, index) =>
+        if (initialSelection == index)
+          button.withSelectedActions(selectionEvent(index)).selected
+        else
+          button.withSelectedActions(selectionEvent(index)).deselected
+    }
+    RadioButtonGroup(buttonAssets, width, height)
+      .withRadioButtons(buttons)
   }
 
   val gameTypes: List[String]            = List("base", "flip")

@@ -28,7 +28,8 @@ object Settings {
   val footerStart: Int      = areaHeight - footerHeight + 1
 
   /** The time that each movement step by the player or a boulder should take */
-  val stepTime = Seconds(0.1)
+  val stepTime       = Seconds(0.1)
+  val replayStepTime = Seconds(0.3)
 
   /** The number of levels to fit on each row on the levels scene */
   val levelTypesPosition    = Point(halfSize, halfSize)

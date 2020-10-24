@@ -17,7 +17,7 @@ object SuccessScene extends Scene[ReferenceData, Model, ViewModel] {
   def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case BackButtonEvent =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
-    case KeyboardEvent.KeyUp(Keys.ESCAPE) =>
+    case KeyboardEvent.KeyUp(Key.ESCAPE) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case ReplayButtonEvent =>
       Outcome(
@@ -29,7 +29,7 @@ object SuccessScene extends Scene[ReferenceData, Model, ViewModel] {
           )
         )
       ).addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))
-    case KeyboardEvent.KeyUp(Keys.KEY_R) =>
+    case KeyboardEvent.KeyUp(Key.KEY_R) =>
       Outcome(
         playLens.set(
           model,
@@ -42,7 +42,7 @@ object SuccessScene extends Scene[ReferenceData, Model, ViewModel] {
     case ForwardButtonEvent =>
       Outcome(goToNextLevel(model, context.startUpData))
         .addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))
-    case KeyboardEvent.KeyUp(Keys.SPACE) =>
+    case KeyboardEvent.KeyUp(Key.SPACE) =>
       Outcome(goToNextLevel(model, context.startUpData))
         .addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))
     case _ => Outcome(model)

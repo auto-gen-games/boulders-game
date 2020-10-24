@@ -19,7 +19,7 @@ object StartScene extends Scene[ReferenceData, Model, ViewModel] {
   def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
     case Click(_, _) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
-    case KeyboardEvent.KeyUp(Keys.SPACE) =>
+    case KeyboardEvent.KeyUp(Key.SPACE) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case _ =>
       Outcome(model)

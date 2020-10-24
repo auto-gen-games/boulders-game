@@ -1,12 +1,12 @@
 import indigo.Outcome
 import indigo.shared.input.Mouse
-import indigoextras.ui.Button
+import indigoextras.ui._
 
 object ButtonUpdate {
   def updateButton(button: Button, mouse: Mouse): Outcome[Button] =
     button.update(mouse)
 
-  def updateRadio(button: RadioButton, mouse: Mouse): Outcome[RadioButton] =
+  def updateRadio(button: RadioButtonGroup, mouse: Mouse): Outcome[RadioButtonGroup] =
     button.update(mouse)
 
   def updateList[V](updater: (V, Mouse) => Outcome[V])(buttons: List[V], mouse: Mouse): Outcome[List[V]] =

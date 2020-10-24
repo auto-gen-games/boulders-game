@@ -4,7 +4,7 @@ import Settings._
 import ViewLogic._
 import indigo._
 import indigo.scenes.{Scene, SceneName}
-import indigoextras.ui.Button
+import indigoextras.ui.{Button, RadioButtonGroup}
 
 import scala.scalajs.js.annotation.JSExportTopLevel
 
@@ -14,7 +14,8 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
   /** The initial game model starts with the tutorial level, and with no levels marked completed. */
   def initialModel(startupData: ReferenceData): Model = {
     val completedLevels = gameTypes.map(kind => (kind -> Set[Int]())).toMap
-    Model("base", play(startupData.tutorial, startupData.guide), completedLevels)
+    val defaultPlay     = play(startupData.tutorial, startupData.guide)
+    Model("base", defaultPlay, completedLevels, ReplayModel(defaultPlay, List.empty, Seconds.zero))
   }
 
   /** Copied from the Snake demo, loading assets and the viewport. */
@@ -34,7 +35,7 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
 
   /** Three scenes: start screen, levels choice, game play screen */
   def scenes(bootData: GameViewport): NonEmptyList[Scene[ReferenceData, Model, ViewModel]] =
-    NonEmptyList(StartScene, LevelsScene, new GlobalisedScene(PlayScene), SuccessScene)
+    NonEmptyList(StartScene, LevelsScene, new GlobalisedScene(PlayScene), SuccessScene, ReplayScene)
 
   def initialScene(bootData: GameViewport): Option[SceneName] =
     Some(StartScene.name)
@@ -44,7 +45,7 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       bootData: GameViewport,
       assetCollection: AssetCollection,
       dice: Dice
-  ): Startup[StartupErrors, ReferenceData] = {
+  ): Startup[ReferenceData] = {
     val specs =
       levelSpecs
         .map { case (kind, name) => kind -> assetCollection.findTextDataByName(name).map(Level.decodeLevels(kind, _)) }
@@ -60,7 +61,7 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       .Success(ReferenceData(bootData, level, specs, guide, spriteAnim.sprite))
       .addAnimations(spriteAnim.animations)
 
-    result.getOrElse(Startup.Failure.withErrors("Could not load or parse game data"))
+    result.getOrElse(Startup.Failure("Could not load or parse game data"))
   }
 
   def initialViewModel(startupData: ReferenceData, model: Model): ViewModel = {
@@ -86,7 +87,7 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       gameTypes.map(kind => kind -> levelButtons(startupData.levels(kind).size)).toMap
     val tutorialButtons: Map[String, Button] =
       gameTypes.map(kind => kind -> createButton("button-base", tutorialLevelPosition, TutorialButtonEvent)).toMap
-    val kindButtons: RadioButton =
+    val kindButtons: RadioButtonGroup =
       gameTypeButton
 
     val levelSceneButtons: LevelsSceneButtons =
@@ -96,6 +97,6 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
     val successSceneButtons: List[Button] =
       List(forwardButton, backButton, replayButton)
 
-    ViewModel(levelSceneButtons, playSceneButtons, successSceneButtons)
+    ViewModel(levelSceneButtons, playSceneButtons, successSceneButtons, backButton)
   }
 }

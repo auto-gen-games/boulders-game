@@ -1,5 +1,5 @@
 import GameAssets.{boulder, fontKey}
-import Model.completedLens
+import Model.{completedLens, replayLens}
 import PlayModel._
 import Settings._
 import ViewLogic._
@@ -23,35 +23,45 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
       checkSuccess(Outcome(updateMovement(model, context.gameTime.running)))
     case Click(_, _) if enabled(model).contains(SpaceContinueEvent) =>
       Outcome(stepTutorial(model))
-    case KeyboardEvent.KeyUp(Keys.SPACE) if enabled(model).contains(SpaceContinueEvent) =>
+    case KeyboardEvent.KeyUp(Key.SPACE) if enabled(model).contains(SpaceContinueEvent) =>
       Outcome(stepTutorial(model))
     case LeftButtonEvent if enabled(model).contains(LeftButtonEvent) =>
       addBoulderRoll(Outcome(stepTutorial(move(model, -1, context.gameTime.running))))
-    case KeyboardEvent.KeyDown(Keys.LEFT_ARROW) if enabled(model).contains(LeftButtonEvent) =>
+    case KeyboardEvent.KeyDown(Key.LEFT_ARROW) if enabled(model).contains(LeftButtonEvent) =>
       addBoulderRoll(Outcome(stepTutorial(move(model, -1, context.gameTime.running))))
     case RightButtonEvent if enabled(model).contains(RightButtonEvent) =>
       addBoulderRoll(Outcome(stepTutorial(move(model, 1, context.gameTime.running))))
-    case KeyboardEvent.KeyDown(Keys.RIGHT_ARROW) if enabled(model).contains(RightButtonEvent) =>
+    case KeyboardEvent.KeyDown(Key.RIGHT_ARROW) if enabled(model).contains(RightButtonEvent) =>
       addBoulderRoll(Outcome(stepTutorial(move(model, 1, context.gameTime.running))))
     case ExtendButtonEvent if enabled(model).contains(ExtendButtonEvent) =>
       if (!model.extended) Outcome(stepTutorial(extend(model, context.gameTime.running)))
       else Outcome(stepTutorial(unextend(model, context.gameTime.running)))
-    case KeyboardEvent.KeyDown(Keys.UP_ARROW) if enabled(model).contains(ExtendButtonEvent) =>
+    case KeyboardEvent.KeyDown(Key.UP_ARROW) if enabled(model).contains(ExtendButtonEvent) =>
       Outcome(stepTutorial(extend(model, context.gameTime.running)))
-    case KeyboardEvent.KeyDown(Keys.DOWN_ARROW) if enabled(model).contains(ExtendButtonEvent) =>
+    case KeyboardEvent.KeyDown(Key.DOWN_ARROW) if enabled(model).contains(ExtendButtonEvent) =>
       Outcome(stepTutorial(unextend(model, context.gameTime.running)))
     case FlipButtonEvent if enabled(model).contains(FlipButtonEvent) =>
       Outcome(stepTutorial(flip(model, context.gameTime.running)))
-    case KeyboardEvent.KeyDown(Keys.KEY_F) if enabled(model).contains(FlipButtonEvent) =>
+    case KeyboardEvent.KeyDown(Key.KEY_F) if enabled(model).contains(FlipButtonEvent) =>
       Outcome(stepTutorial(flip(model, context.gameTime.running)))
     case BackButtonEvent if enabled(model).contains(BackButtonEvent) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
-    case KeyboardEvent.KeyUp(Keys.ESCAPE) if enabled(model).contains(BackButtonEvent) =>
+    case KeyboardEvent.KeyUp(Key.ESCAPE) if enabled(model).contains(BackButtonEvent) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case ReplayButtonEvent if enabled(model).contains(ReplayButtonEvent) =>
       Outcome(stepTutorial(play(context.startUpData.levels(model.maze.kind)(model.maze.number), model.tutorial)))
-    case KeyboardEvent.KeyUp(Keys.KEY_R) if enabled(model).contains(ReplayButtonEvent) =>
+    case KeyboardEvent.KeyUp(Key.KEY_R) if enabled(model).contains(ReplayButtonEvent) =>
       Outcome(stepTutorial(play(context.startUpData.levels(model.maze.kind)(model.maze.number), model.tutorial)))
+    case KeyboardEvent.KeyDown(Key.KEY_S)
+        if context.keyboard.keysDown.contains(Key.CTRL) && context.keyboard.keysDown.contains(Key.SHIFT) =>
+      Solve.aStarSearch(model) match {
+        case None => Outcome(model).addGlobalEvents(PlaySound(AssetName("rolling"), Volume.Max))
+        case Some(solution) =>
+          Outcome(model).addGlobalEvents(
+            ModifyEvent[Model, ReplayModel](replayLens, _ => ReplayModel(model, solution, context.gameTime.running)),
+            SceneEvent.JumpTo(ReplayScene.name)
+          )
+      }
     case _ => Outcome(model)
   }
 

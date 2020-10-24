@@ -7,13 +7,14 @@ import indigoextras.ui._
 case class ViewModel(
     levelSceneButtons: LevelsSceneButtons,
     playSceneButtons: PlaySceneButtons,
-    successSceneButtons: List[Button]
+    successSceneButtons: List[Button],
+    replaySceneButton: Button
 )
 
 case class LevelsSceneButtons(
     levelButtons: Map[String, List[Button]],
     tutorialButtons: Map[String, Button],
-    typeButton: RadioButton
+    typeButton: RadioButtonGroup
 ) {
   def draw(gameType: String): List[SceneGraphNodePrimitive] =
     levelButtons(gameType).map(_.draw) :+ typeButton.draw :+ tutorialButtons(gameType).draw

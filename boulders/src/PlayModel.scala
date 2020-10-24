@@ -105,19 +105,21 @@ object PlayModel {
     else
       model.copy(playerMoves = model.playerMoves :+ Movement(model.position, 0, 0, false, started, tryGraphic(dx, 0)))
 
+  def canExtend(model: PlayModel): Boolean =
+    !model.extended && !hasFloor(model.maze, model.position.moveBy(0, -1))
+
   /** Extend the player upwards if possible. */
   def extend(model: PlayModel, started: Seconds): PlayModel =
-    if (model.extended || hasFloor(model.maze, model.position.moveBy(0, -1)))
-      model
-    else
-      movePlayer(model, 0, -1, false, started)
+    if (!canExtend(model)) model
+    else movePlayer(model, 0, -1, false, started)
+
+  def canUnextend(model: PlayModel): Boolean =
+    model.extended
 
   /** Unextend the player if extended. */
   def unextend(model: PlayModel, started: Seconds): PlayModel =
-    if (!model.extended)
-      model
-    else
-      movePlayer(model, 0, 1, false, started)
+    if (!canUnextend(model)) model
+    else movePlayer(model, 0, 1, false, started)
 
   /** Called after a player moves, this pushes a boulder at the moved to position if there is one, and then
     * lets it fall until stopped.

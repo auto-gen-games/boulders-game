@@ -1,7 +1,7 @@
 import GameAssets.{createButton, createRadio, gameTypes}
 import indigo._
 import Settings._
-import indigoextras.ui.{Button, ButtonAssets}
+import indigoextras.ui.{Button, ButtonAssets, RadioButtonGroup}
 
 /** Utility functions for placing graphics on the play scene. */
 object ViewLogic {
@@ -13,7 +13,7 @@ object ViewLogic {
       .map(level => createButton("button-base", levelButtonPosition(level), LevelButtonEvent(level)))
       .toList
 
-  def gameTypeButton: RadioButton = {
+  def gameTypeButton: RadioButtonGroup = {
     val positions = gameTypes.indices.map(index => moveBy(levelTypesPosition, index * 64, 0)).toList
     createRadio(
       assetName = "type-button",
