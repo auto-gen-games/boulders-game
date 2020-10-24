@@ -1,4 +1,5 @@
 import GameAssets._
+import Level.{baseKind, flipKind, levelKinds}
 import PlayModel.play
 import Settings._
 import ViewLogic._
@@ -13,9 +14,9 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
 
   /** The initial game model starts with the tutorial level, and with no levels marked completed. */
   def initialModel(startupData: ReferenceData): Model = {
-    val completedLevels = gameTypes.map(kind => (kind -> Set[Int]())).toMap
+    val completedLevels = levelKinds.map(kind => (kind -> Set[Int]())).toMap
     val defaultPlay     = play(startupData.tutorial, startupData.guide)
-    Model("base", defaultPlay, completedLevels, ReplayModel(defaultPlay, List.empty, Seconds.zero))
+    Model(baseKind, defaultPlay, completedLevels, ReplayModel(defaultPlay, List.empty, Seconds.zero))
   }
 
   /** Copied from the Snake demo, loading assets and the viewport. */
@@ -55,7 +56,7 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
         .toMap
     val result = for {
       spriteAnim <- GameAssets.loadAnimation(assetCollection, dice, highlightJSON, highlightBox, Depth(0))
-      level      <- assetCollection.findTextDataByName(tutorialSpec).map(Level.levelFromCode("base", -1, _))
+      level      <- assetCollection.findTextDataByName(tutorialSpec).map(Level.levelFromCode(baseKind, -1, _))
       guide      <- assetCollection.findTextDataByName(tutorialGuide).map(TutorialGuideLine.loadGuide)
     } yield Startup
       .Success(ReferenceData(bootData, level, specs, guide, spriteAnim.sprite))
@@ -83,17 +84,26 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       createButton("back-button", forwardBoxPosition, ForwardButtonEvent, flipped = true)
     val replayButton: Button =
       createButton("replay-button", replayBoxPosition, ReplayButtonEvent)
-    val levelNumberButtons: Map[String, List[Button]] =
-      gameTypes.map(kind => kind -> levelButtons(startupData.levels(kind).size)).toMap
-    val tutorialButtons: Map[String, Button] =
-      gameTypes.map(kind => kind -> createButton("button-base", tutorialLevelPosition, TutorialButtonEvent)).toMap
+    val levelNumberButtons: Map[LevelKind, List[Button]] =
+      levelKinds.map(kind => kind -> levelButtons(kind, startupData.levels(kind).size)).toMap
+    val tutorialButtons: Map[LevelKind, Button] =
+      levelKinds
+        .map(kind =>
+          kind -> createButton(
+            "button-base",
+            tutorialLevelPosition,
+            TutorialButtonEvent,
+            tint = Some(levelKindTints(kind))
+          )
+        )
+        .toMap
     val kindButtons: RadioButtonGroup =
       gameTypeButton
 
     val levelSceneButtons: LevelsSceneButtons =
       LevelsSceneButtons(levelNumberButtons, tutorialButtons, kindButtons)
     val playSceneButtons: PlaySceneButtons =
-      PlaySceneButtons(Map("base" -> baseControls, "flip" -> flipControls), List(backButton, replayButton))
+      PlaySceneButtons(Map(baseKind -> baseControls, flipKind -> flipControls), List(backButton, replayButton))
     val successSceneButtons: List[Button] =
       List(forwardButton, backButton, replayButton)
 

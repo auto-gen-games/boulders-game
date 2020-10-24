@@ -1,5 +1,7 @@
+import Level.{baseKind, flipKind}
 import indigo._
 import PlayModel._
+
 import scala.annotation.tailrec
 
 object Solve {
@@ -43,10 +45,10 @@ object Solve {
     def enact(game: PlayModel, started: Seconds): Option[PlayModel] =
       ifNotLost(flip(game, started))
   }
-  val moves: Map[String, Set[Move]] =
+  val moves: Map[LevelKind, Set[Move]] =
     Map(
-      "base" -> Set(MoveLeft, MoveRight, MoveExtend, MoveUnextend),
-      "flip" -> Set(MoveLeft, MoveRight, MoveExtend, MoveUnextend, MoveFlip)
+      baseKind -> Set(MoveLeft, MoveRight, MoveExtend, MoveUnextend),
+      flipKind -> Set(MoveLeft, MoveRight, MoveExtend, MoveUnextend, MoveFlip)
     )
 
   def equivalentGames(model1: PlayModel, model2: PlayModel): Boolean =

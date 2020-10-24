@@ -1,3 +1,4 @@
+import Level.levelKinds
 import Settings._
 import indigo._
 import indigo.json.Json
@@ -41,6 +42,12 @@ object GameAssets {
   def graphic(asset: String, width: Int = cellSize, height: Int = cellSize): Graphic =
     Graphic(0, 0, width, height, 2, materials(asset))
 
+  def possiblyTint(graphic: Graphic, tint: Option[RGBA]): Graphic =
+    tint match {
+      case Some(value) => graphic.withTint(value)
+      case None        => graphic
+    }
+
   /** Creates a button from the given graphics asset, at a position, and triggering an event */
   def createButton(
       assetName: String,
@@ -49,16 +56,25 @@ object GameAssets {
       row: Int = 0,
       width: Int = cellSize,
       height: Int = cellSize,
-      flipped: Boolean = false
+      flipped: Boolean = false,
+      tint: Option[RGBA] = None
   ): Button = {
     val material = Material.Textured(AssetName(assetName))
     val buttonAssets = ButtonAssets(
-      up = Graphic(0, 0, width, height, 2, material).withCrop(0, row * height, width, height).flipHorizontal(flipped),
-      over =
+      up = possiblyTint(
+        Graphic(0, 0, width, height, 2, material).withCrop(0, row * height, width, height).flipHorizontal(flipped),
+        tint
+      ),
+      over = possiblyTint(
         Graphic(0, 0, width, height, 2, material).withCrop(width, row * height, width, height).flipHorizontal(flipped),
-      down = Graphic(0, 0, width, height, 2, material)
-        .withCrop(width * 2, row * height, width, height)
-        .flipHorizontal(flipped)
+        tint
+      ),
+      down = possiblyTint(
+        Graphic(0, 0, width, height, 2, material)
+          .withCrop(width * 2, row * height, width, height)
+          .flipHorizontal(flipped),
+        tint
+      )
     )
     Button(
       buttonAssets = buttonAssets,
@@ -94,8 +110,8 @@ object GameAssets {
       .withRadioButtons(buttons)
   }
 
-  val gameTypes: List[String]            = List("base", "flip")
-  val levelSpecs: Map[String, AssetName] = gameTypes.map(kind => kind -> AssetName(s"levels-$kind")).toMap
+  val levelSpecs: Map[LevelKind, AssetName] =
+    levelKinds.map(kind => kind -> AssetName(s"levels-${kind.name}")).toMap
 
   val tutorialSpec  = AssetName("tutorial-level")
   val tutorialGuide = AssetName("tutorial-guide")

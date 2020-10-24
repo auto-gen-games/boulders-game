@@ -1,4 +1,4 @@
-import Level.{hasFloor, hasLeftWall, inBounds}
+import Level.{baseKind, flipKind, hasFloor, hasLeftWall, inBounds}
 import Matrix.updated
 import Settings.stepTime
 import indigo.shared.scenegraph.{Graphic, Sprite}
@@ -34,9 +34,9 @@ final case class PlayModel(
 object PlayModel {
 
   /** Enable all buttons on the play scene by default */
-  val allButtonEvents: Map[String, Set[PlaySceneButtonEvent]] =
+  val allButtonEvents: Map[LevelKind, Set[PlaySceneButtonEvent]] =
     Map(
-      "base" -> Set(
+      baseKind -> Set(
         BackButtonEvent,
         UndoButtonEvent,
         ReplayButtonEvent,
@@ -44,7 +44,7 @@ object PlayModel {
         RightButtonEvent,
         ExtendButtonEvent
       ),
-      "flip" -> Set(
+      flipKind -> Set(
         BackButtonEvent,
         UndoButtonEvent,
         ReplayButtonEvent,

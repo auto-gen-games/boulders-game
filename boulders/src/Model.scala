@@ -3,9 +3,9 @@ import indigo.scenes.Lens
 
 /** The overall model for the game is the current play grid and the set of levels completed. */
 final case class Model(
-    selectedType: String,
+    selectedType: LevelKind,
     playModel: PlayModel,
-    completed: Map[String, Set[Int]],
+    completed: Map[LevelKind, Set[Int]],
     replay: ReplayModel
 )
 

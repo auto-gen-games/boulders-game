@@ -1,5 +1,5 @@
-import indigo.shared.datatypes.Rectangle
-import indigo.{Millis, Point, Seconds}
+import Level.{baseKind, flipKind}
+import indigo.{Point, RGB, RGBA, Seconds}
 
 /** Constants for the display settings. */
 object Settings {
@@ -36,6 +36,9 @@ object Settings {
   val tutorialLevelPosition = Point(halfSize, cellSize * 2)
   val levelButtonsPosition  = Point(halfSize, cellSize * 3 + halfSize)
   val levelsPerRow: Int     = (areaWidth - leftMargin - rightMargin) / cellSize
+
+  val levelKindTints: Map[LevelKind, RGBA] =
+    Map(baseKind -> RGBA(0.5, 0.5, 0.5, 1.0), flipKind -> RGBA(0.7, 0.5, 0.5, 1.0))
 
   val backBoxPosition          = Point(0, 0)
   val undoBoxPosition          = Point(horizontalCenter - cellSize / 2, 0)

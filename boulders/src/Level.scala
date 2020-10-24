@@ -1,12 +1,14 @@
 import Matrix.{emptyBooleanMatrix, updated}
 
+case class LevelKind(name: String) extends AnyVal
+
 /** A level specification, from which a game can be started. Each level has a width and height in grid cells,
   * a matrix specifying which cells have walls to the left, a matrix for which cells have floors underneath,
   * a matrix specifying which cells contain a boulder initially, the start position of the player, and the
   * positions of the diamond and exit.
   */
 final case class Level(
-    kind: String,
+    kind: LevelKind,
     number: Int,
     width: Int,
     height: Int,
@@ -19,10 +21,13 @@ final case class Level(
 )
 
 object Level {
+  val baseKind: LevelKind         = LevelKind("base")
+  val flipKind: LevelKind         = LevelKind("flip")
+  val levelKinds: List[LevelKind] = List(baseKind, flipKind)
 
   /** Creates an empty level of a given width and height, start, diamond and exit positions. */
   def empty(
-      kind: String,
+      kind: LevelKind,
       number: Int,
       width: Int,
       height: Int,
@@ -85,11 +90,11 @@ object Level {
     maze.copy(leftWalls = updated(maze.leftWalls, x, y, value = true))
 
   /** Decodes a newline-delimited list of serialised level specs. */
-  def decodeLevels(kind: String, codes: String): Vector[Level] =
+  def decodeLevels(kind: LevelKind, codes: String): Vector[Level] =
     codes.split('\n').zipWithIndex.map(ln => levelFromCode(kind, ln._2, ln._1)).toVector
 
   /** Decodes a single serialised level spec. */
-  def levelFromCode(kind: String, number: Int, code: String): Level = {
+  def levelFromCode(kind: LevelKind, number: Int, code: String): Level = {
     def coordinate(point: String): GridPoint = {
       val coordinates = point.split(",")
       GridPoint(coordinates(0).toInt, coordinates(1).toInt)

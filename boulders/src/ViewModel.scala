@@ -12,17 +12,17 @@ case class ViewModel(
 )
 
 case class LevelsSceneButtons(
-    levelButtons: Map[String, List[Button]],
-    tutorialButtons: Map[String, Button],
+    levelButtons: Map[LevelKind, List[Button]],
+    tutorialButtons: Map[LevelKind, Button],
     typeButton: RadioButtonGroup
 ) {
-  def draw(gameType: String): List[SceneGraphNodePrimitive] =
-    levelButtons(gameType).map(_.draw) :+ typeButton.draw :+ tutorialButtons(gameType).draw
+  def draw(levelKind: LevelKind): List[SceneGraphNodePrimitive] =
+    levelButtons(levelKind).map(_.draw) :+ typeButton.draw :+ tutorialButtons(levelKind).draw
 
-  def update(gameType: String, mouse: Mouse): Outcome[LevelsSceneButtons] =
+  def update(levelKind: LevelKind, mouse: Mouse): Outcome[LevelsSceneButtons] =
     update3Tuple(
-      updateMapValue(gameType, updateList(updateButton)),
-      updateMapValue(gameType, updateButton),
+      updateMapValue(levelKind, updateList(updateButton)),
+      updateMapValue(levelKind, updateButton),
       updateRadio
     )(levelButtons, tutorialButtons, typeButton, mouse).map {
       case (newLevelButtons, newTutorialButtons, newTypeButtons) =>
@@ -30,13 +30,13 @@ case class LevelsSceneButtons(
     }
 }
 
-case class PlaySceneButtons(controls: Map[String, List[Button]], navigation: List[Button]) {
-  def draw(gameType: String): List[SceneGraphNodePrimitive] =
-    controls(gameType).map(_.draw) ++ navigation.map(_.draw)
+case class PlaySceneButtons(controls: Map[LevelKind, List[Button]], navigation: List[Button]) {
+  def draw(levelKind: LevelKind): List[SceneGraphNodePrimitive] =
+    controls(levelKind).map(_.draw) ++ navigation.map(_.draw)
 
-  def update(gameType: String, mouse: Mouse): Outcome[PlaySceneButtons] =
+  def update(levelKind: LevelKind, mouse: Mouse): Outcome[PlaySceneButtons] =
     update2Tuple(
-      updateMapValue(gameType, updateList(updateButton)),
+      updateMapValue(levelKind, updateList(updateButton)),
       updateList(updateButton)
     )(controls, navigation, mouse).map {
       case (newControls, newNavigation) =>

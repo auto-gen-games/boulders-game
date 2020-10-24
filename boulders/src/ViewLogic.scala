@@ -1,4 +1,5 @@
-import GameAssets.{createButton, createRadio, gameTypes}
+import GameAssets.{createButton, createRadio}
+import Level.levelKinds
 import indigo._
 import Settings._
 import indigoextras.ui.{Button, ButtonAssets, RadioButtonGroup}
@@ -8,13 +9,20 @@ object ViewLogic {
   def moveBy(position: Point, dx: Int, dy: Int): Point =
     Point(position.x + dx, position.y + dy)
 
-  def levelButtons(numberOfLevels: Int): List[Button] =
+  def levelButtons(kind: LevelKind, numberOfLevels: Int): List[Button] =
     (0 until numberOfLevels)
-      .map(level => createButton("button-base", levelButtonPosition(level), LevelButtonEvent(level)))
+      .map(level =>
+        createButton(
+          "button-base",
+          levelButtonPosition(level),
+          LevelButtonEvent(level),
+          tint = Some(levelKindTints(kind))
+        )
+      )
       .toList
 
   def gameTypeButton: RadioButtonGroup = {
-    val positions = gameTypes.indices.map(index => moveBy(levelTypesPosition, index * 64, 0)).toList
+    val positions = levelKinds.indices.map(index => moveBy(levelTypesPosition, index * 64, 0)).toList
     createRadio(
       assetName = "type-button",
       positions = positions,
@@ -66,8 +74,8 @@ object ViewLogic {
     Point(box.x + numberLeftPos(level + 1), box.y + 10)
   }
 
-  def levelTypeTextPosition(kind: String): Point =
-    moveBy(levelTypesPosition, gameTypes.indexOf(kind) * 64 + 8, 10)
+  def levelTypeTextPosition(kind: LevelKind): Point =
+    moveBy(levelTypesPosition, levelKinds.indexOf(kind) * 64 + 8, 10)
 
   def placeIndicator(indicator: Indicator, model: PlayModel, highlight: Sprite): Option[Sprite] =
     indicator match {

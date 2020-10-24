@@ -1,4 +1,5 @@
 import GameAssets.{boulder, fontKey}
+import Level.flipKind
 import Model.{completedLens, replayLens}
 import PlayModel._
 import Settings._
@@ -172,8 +173,8 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
   // The footer instructions
   def controlInstructions(model: PlayModel): String =
     model.maze.kind match {
-      case "flip" => "Arrow keys and F / buttons above"
-      case _      => "Arrow keys / buttons above"
+      case a if a == flipKind => "Arrow keys and F / buttons above"
+      case _                  => "Arrow keys / buttons above"
     }
 
   def drawPlayer(model: PlayModel, time: Seconds): Group = {
