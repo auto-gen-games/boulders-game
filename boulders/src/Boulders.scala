@@ -15,7 +15,7 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
   /** The initial game model starts with the tutorial level, and with no levels marked completed. */
   def initialModel(startupData: ReferenceData): Model = {
     val completedLevels = levelKinds.map(kind => (kind -> Set[Int]())).toMap
-    val defaultPlay     = play(startupData.tutorial, startupData.guide)
+    val defaultPlay     = play(startupData.tutorial(baseKind), startupData.guide(baseKind))
     Model(baseKind, defaultPlay, completedLevels, ReplayModel(defaultPlay, List.empty, Seconds.zero))
   }
 
@@ -47,19 +47,24 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       assetCollection: AssetCollection,
       dice: Dice
   ): Startup[ReferenceData] = {
-    val specs =
-      levelSpecs
-        .map { case (kind, name) => kind -> assetCollection.findTextDataByName(name).map(Level.decodeLevels(kind, _)) }
+    def mapKindAssets[Result](
+        kindMap: Map[LevelKind, AssetName],
+        toValue: (LevelKind, String) => Result
+    ): Map[LevelKind, Result] =
+      kindMap
+        .map { case (kind, name) => kind -> assetCollection.findTextDataByName(name).map(toValue(kind, _)) }
         .filter(_._2.isDefined)
         .view
         .mapValues(_.get)
         .toMap
+
+    val specs     = mapKindAssets(levelSpecs, Level.decodeLevels)
+    val tutorials = mapKindAssets(tutorialSpecs, Level.levelFromCode(_, -1, _))
+    val guides    = mapKindAssets(tutorialGuides, TutorialGuideLine.loadGuide)
     val result = for {
       spriteAnim <- GameAssets.loadAnimation(assetCollection, dice, highlightJSON, highlightBox, Depth(0))
-      level      <- assetCollection.findTextDataByName(tutorialSpec).map(Level.levelFromCode(baseKind, -1, _))
-      guide      <- assetCollection.findTextDataByName(tutorialGuide).map(TutorialGuideLine.loadGuide)
     } yield Startup
-      .Success(ReferenceData(bootData, level, specs, guide, spriteAnim.sprite))
+      .Success(ReferenceData(bootData, tutorials, specs, guides, spriteAnim.sprite))
       .addAnimations(spriteAnim.animations)
 
     result.getOrElse(Startup.Failure("Could not load or parse game data"))

@@ -5,8 +5,8 @@ import indigo._
   */
 case class ReferenceData(
     viewport: GameViewport,
-    tutorial: Level,
+    tutorial: Map[LevelKind, Level],
     levels: Map[LevelKind, Vector[Level]],
-    guide: Vector[TutorialGuideLine],
+    guide: Map[LevelKind, Vector[TutorialGuideLine]],
     highlight: Sprite
 )

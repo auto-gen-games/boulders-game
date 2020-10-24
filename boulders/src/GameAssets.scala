@@ -25,9 +25,17 @@ object GameAssets {
     "wall"
   )
   val buttonFiles = Set("back-button", "control-arrows", "replay-button", "undo-button", "type-button")
-  val textFiles   = Set("levels-base", "levels-flip", "levels-pipe", "tutorial-level", "tutorial-guide")
-  val jsonFiles   = Set("highlight")
-  val audioFiles  = Set("rolling")
+  val textFiles = Set(
+    "levels-base",
+    "levels-flip",
+    "levels-pipe",
+    "tutorial-level-base",
+    "tutorial-level-flip",
+    "tutorial-guide-base",
+    "tutorial-guide-flip"
+  )
+  val jsonFiles  = Set("highlight")
+  val audioFiles = Set("rolling")
 
   def assets(baseUrl: String): Set[AssetType] =
     imageFiles.map(file => AssetType.Image(AssetName(file), AssetPath(baseUrl + s"assets/$file.png"))) ++
@@ -112,9 +120,10 @@ object GameAssets {
 
   val levelSpecs: Map[LevelKind, AssetName] =
     levelKinds.map(kind => kind -> AssetName(s"levels-${kind.name}")).toMap
-
-  val tutorialSpec  = AssetName("tutorial-level")
-  val tutorialGuide = AssetName("tutorial-guide")
+  val tutorialSpecs: Map[LevelKind, AssetName] =
+    levelKinds.map(kind => kind -> AssetName(s"tutorial-level-${kind.name}")).toMap
+  val tutorialGuides: Map[LevelKind, AssetName] =
+    levelKinds.map(kind => kind -> AssetName(s"tutorial-guide-${kind.name}")).toMap
   val highlightBox  = AssetName("highlight-sheet")
   val highlightJSON = AssetName("highlight")
 

@@ -1,0 +1,9 @@
+-;Flip level rules are the;same as before
+-;But now you have one;flip to use
+F;Flip inverts the maze
+>;On flip falling boulders;could squash you
+<;or the diamond
+>;or the exit
+^;You have only one flip
+>;So choose carefully
+^;when to use it

@@ -25,7 +25,7 @@ object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
       Outcome(
         playLens.set(
           model,
-          play(context.startUpData.tutorial, context.startUpData.guide)
+          play(context.startUpData.tutorial(model.selectedType), context.startUpData.guide(model.selectedType))
         )
       )
         .addGlobalEvents(SceneEvent.JumpTo(PlayScene.name))

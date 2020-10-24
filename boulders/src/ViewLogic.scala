@@ -112,6 +112,9 @@ object ViewLogic {
       case ExtendIndicator =>
         Some(highlight.moveTo(Settings.extendControlPosition).play())
 
+      case FlipIndicator =>
+        Some(highlight.moveTo(Settings.flipControlPosition).play())
+
       case ReplayIndicator =>
         Some(highlight.moveTo(Settings.replayBoxPosition).play())
     }
