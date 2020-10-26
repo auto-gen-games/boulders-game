@@ -50,9 +50,9 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
     case KeyboardEvent.KeyUp(Key.ESCAPE) if enabled(model).contains(BackButtonEvent) =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(LevelsScene.name))
     case ReplayButtonEvent if enabled(model).contains(ReplayButtonEvent) =>
-      Outcome(stepTutorial(play(context.startUpData.levels(model.maze.kind)(model.maze.number), model.tutorial)))
+      Outcome(stepTutorial(play(context.startUpData.getLevel(model.maze.kind, model.maze.number), model.tutorial)))
     case KeyboardEvent.KeyUp(Key.KEY_R) if enabled(model).contains(ReplayButtonEvent) =>
-      Outcome(stepTutorial(play(context.startUpData.levels(model.maze.kind)(model.maze.number), model.tutorial)))
+      Outcome(stepTutorial(play(context.startUpData.getLevel(model.maze.kind, model.maze.number), model.tutorial)))
     case KeyboardEvent.KeyDown(Key.KEY_S)
         if context.keyboard.keysDown.contains(Key.CTRL) && context.keyboard.keysDown.contains(Key.SHIFT) =>
       Solve.aStarSearch(model) match {

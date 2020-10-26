@@ -9,4 +9,7 @@ case class ReferenceData(
     levels: Map[LevelKind, Vector[Level]],
     guide: Map[LevelKind, Vector[TutorialGuideLine]],
     highlight: Sprite
-)
+) {
+  def getLevel(kind: LevelKind, number: Int): Level =
+    if (number < 0) tutorial(kind) else levels(kind)(number)
+}
