@@ -1,4 +1,4 @@
-import indigo.Seconds
+import indigo.{GlobalEvent, Seconds}
 import indigo.scenes.Lens
 
 /** The overall model for the game is the current play grid and the set of levels completed. */
@@ -20,3 +20,6 @@ object Model {
       (m, v) => m.copy(completed = m.completed + (m.selectedType -> v))
     )
 }
+
+case class SolvedLevel(kind: LevelKind, number: Int) extends GlobalEvent
+case class ReplayEvent(replayModel: ReplayModel)     extends GlobalEvent

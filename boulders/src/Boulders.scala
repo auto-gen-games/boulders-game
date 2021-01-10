@@ -11,32 +11,35 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 
 @JSExportTopLevel("IndigoGame")
 object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel] {
+  val eventFilters: EventFilters = EventFilters.AllowAll
 
   /** The initial game model starts with the tutorial level, and with no levels marked completed. */
-  def initialModel(startupData: ReferenceData): Model = {
+  def initialModel(startupData: ReferenceData): Outcome[Model] = {
     val completedLevels = levelKinds.map(kind => (kind -> Set[Int]())).toMap
     val defaultPlay     = play(startupData.tutorial(baseKind), startupData.guide(baseKind))
-    Model(baseKind, defaultPlay, completedLevels, ReplayModel(defaultPlay, List.empty, Seconds.zero))
+    Outcome(Model(baseKind, defaultPlay, completedLevels, ReplayModel(defaultPlay, List.empty, Seconds.zero)))
   }
 
   /** Copied from the Snake demo, loading assets and the viewport. */
-  def boot(flags: Map[String, String]): BootResult[GameViewport] = {
+  def boot(flags: Map[String, String]): Outcome[BootResult[GameViewport]] = {
     val assetPath: String = flags.getOrElse("baseUrl", "")
     val config = GameConfig(
       viewport = GameViewport(Settings.viewportWidth, Settings.viewportHeight),
       frameRate = 60,
-      clearColor = ClearColor.Black,
+      clearColor = RGBA.Black,
       magnification = Settings.magnificationLevel
     )
 
-    BootResult(config, config.viewport)
-      .withAssets(GameAssets.assets(assetPath))
-      .withFonts(GameAssets.fontInfo)
+    Outcome(
+      BootResult(config, config.viewport)
+        .withAssets(GameAssets.assets(assetPath))
+        .withFonts(GameAssets.fontInfo)
+    )
   }
 
   /** Three scenes: start screen, levels choice, game play screen */
   def scenes(bootData: GameViewport): NonEmptyList[Scene[ReferenceData, Model, ViewModel]] =
-    NonEmptyList(StartScene, LevelsScene, new GlobalisedScene(PlayScene), SuccessScene, ReplayScene)
+    NonEmptyList(StartScene, LevelsScene, PlayScene, SuccessScene, ReplayScene)
 
   def initialScene(bootData: GameViewport): Option[SceneName] =
     Some(StartScene.name)
@@ -46,7 +49,7 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       bootData: GameViewport,
       assetCollection: AssetCollection,
       dice: Dice
-  ): Startup[ReferenceData] = {
+  ): Outcome[Startup[ReferenceData]] = {
     def mapKindAssets[Result](
         kindMap: Map[LevelKind, AssetName],
         toValue: (LevelKind, String) => Result
@@ -67,10 +70,10 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
       .Success(ReferenceData(bootData, tutorials, specs, guides, spriteAnim.sprite))
       .addAnimations(spriteAnim.animations)
 
-    result.getOrElse(Startup.Failure("Could not load or parse game data"))
+    Outcome(result.getOrElse(Startup.Failure("Could not load or parse game data")))
   }
 
-  def initialViewModel(startupData: ReferenceData, model: Model): ViewModel = {
+  def initialViewModel(startupData: ReferenceData, model: Model): Outcome[ViewModel] = {
     val leftButton: Button =
       createButton("control-arrows", leftControlPosition, LeftButtonEvent, row = 0)
     val extendButton: Button =
@@ -112,6 +115,27 @@ object Boulders extends IndigoGame[GameViewport, ReferenceData, Model, ViewModel
     val successSceneButtons: List[Button] =
       List(forwardButton, backButton, replayButton)
 
-    ViewModel(levelSceneButtons, playSceneButtons, successSceneButtons, backButton)
+    Outcome(ViewModel(levelSceneButtons, playSceneButtons, successSceneButtons, backButton))
   }
+
+  def updateModel(context: FrameContext[ReferenceData], model: Model): GlobalEvent => Outcome[Model] = {
+    case SolvedLevel(kind, number) =>
+      Outcome(model.copy(completed = model.completed + (kind -> (model.completed(kind) + number))))
+    case ReplayEvent(replayModel) =>
+      Outcome(model.copy(replay = replayModel))
+    case _ => Outcome(model)
+  }
+
+  def updateViewModel(
+      context: FrameContext[ReferenceData],
+      model: Model,
+      viewModel: ViewModel
+  ): GlobalEvent => Outcome[ViewModel] =
+    _ => Outcome(viewModel)
+
+  def present(
+      context: FrameContext[ReferenceData],
+      model: Model,
+      viewModel: ViewModel
+  ): Outcome[SceneUpdateFragment] = Outcome(SceneUpdateFragment.empty)
 }

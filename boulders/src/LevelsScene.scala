@@ -15,7 +15,7 @@ object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
   val name: SceneName                                = SceneName("levels scene")
   val modelLens: Lens[Model, SceneModel]             = Lens.keepLatest
   val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.keepLatest
-  val eventFilters: EventFilters                     = EventFilters.Default
+  val eventFilters: EventFilters                     = EventFilters.AllowAll
   val subSystems: Set[SubSystem]                     = Set()
 
   def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
@@ -49,16 +49,24 @@ object LevelsScene extends Scene[ReferenceData, Model, ViewModel] {
       Outcome(viewModel)
   }
 
-  def present(context: FrameContext[ReferenceData], model: SceneModel, viewModel: SceneViewModel): SceneUpdateFragment =
-    SceneUpdateFragment.empty
-      .addUiLayerNodes(
-        Group(viewModel.levelSceneButtons.draw(model.selectedType)),
-        Group(drawTypeTexts),
-        Group(drawNumbersOnButtons(context.startUpData.levels(model.selectedType))),
-        Group(drawTicksOnButtons(context.startUpData.levels(model.selectedType), model.completed(model.selectedType))),
-        Text("Tutorial", tutorialLevelPosition.x + cellSize + 12, tutorialLevelPosition.y + 10, 1, fontKey),
-        Text("Select level", horizontalCenter, footerStart, 1, fontKey).alignCenter
-      )
+  def present(
+      context: FrameContext[ReferenceData],
+      model: SceneModel,
+      viewModel: SceneViewModel
+  ): Outcome[SceneUpdateFragment] =
+    Outcome(
+      SceneUpdateFragment.empty
+        .addUiLayerNodes(
+          Group(viewModel.levelSceneButtons.draw(model.selectedType)),
+          Group(drawTypeTexts),
+          Group(drawNumbersOnButtons(context.startUpData.levels(model.selectedType))),
+          Group(
+            drawTicksOnButtons(context.startUpData.levels(model.selectedType), model.completed(model.selectedType))
+          ),
+          Text("Tutorial", tutorialLevelPosition.x + cellSize + 12, tutorialLevelPosition.y + 10, 1, fontKey),
+          Text("Select level", horizontalCenter, footerStart, 1, fontKey).alignCenter
+        )
+    )
 
   def drawTypeTexts: List[Text] =
     levelKinds.map { kind =>

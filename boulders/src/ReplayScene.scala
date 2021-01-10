@@ -12,7 +12,7 @@ object ReplayScene extends Scene[ReferenceData, Model, ViewModel] {
   val name: SceneName                                = SceneName("replay scene")
   val modelLens: Lens[Model, SceneModel]             = Model.replayLens
   val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.keepLatest
-  val eventFilters: EventFilters                     = EventFilters.Default
+  val eventFilters: EventFilters                     = EventFilters.AllowAll
   val subSystems: Set[SubSystem]                     = Set()
 
   def updateModel(context: FrameContext[ReferenceData], model: ReplayModel): GlobalEvent => Outcome[ReplayModel] = {
@@ -54,18 +54,20 @@ object ReplayScene extends Scene[ReferenceData, Model, ViewModel] {
       context: FrameContext[ReferenceData],
       model: ReplayModel,
       viewModel: ViewModel
-  ): SceneUpdateFragment =
-    SceneUpdateFragment.empty
-      .addGameLayerNodes(
-        Group(planGraphics(model.state.maze.leftWalls, model.state.maze, GameAssets.wall)),
-        Group(planGraphics(model.state.maze.floors, model.state.maze, GameAssets.floor)),
-        PlayScene.drawRightWall(model.state),
-        PlayScene.drawCeiling(model.state),
-        place(model.state.maze.exit, model.state.maze, GameAssets.exit),
-        PlayScene.drawPlayer(model.state, context.gameTime.running),
-        PlayScene.drawDiamond(model.state),
-        Group(planGraphics(staticBoulders(model.state), model.state.maze, GameAssets.boulder)),
-        PlayScene.drawMovingBoulders(model.state, context.gameTime.running),
-        viewModel.replaySceneButton.draw
-      )
+  ): Outcome[SceneUpdateFragment] =
+    Outcome(
+      SceneUpdateFragment.empty
+        .addGameLayerNodes(
+          Group(planGraphics(model.state.maze.leftWalls, model.state.maze, GameAssets.wall)),
+          Group(planGraphics(model.state.maze.floors, model.state.maze, GameAssets.floor)),
+          PlayScene.drawRightWall(model.state),
+          PlayScene.drawCeiling(model.state),
+          place(model.state.maze.exit, model.state.maze, GameAssets.exit),
+          PlayScene.drawPlayer(model.state, context.gameTime.running),
+          PlayScene.drawDiamond(model.state),
+          Group(planGraphics(staticBoulders(model.state), model.state.maze, GameAssets.boulder)),
+          PlayScene.drawMovingBoulders(model.state, context.gameTime.running),
+          viewModel.replaySceneButton.draw
+        )
+    )
 }

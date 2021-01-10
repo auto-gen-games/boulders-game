@@ -13,7 +13,7 @@ object StartScene extends Scene[ReferenceData, Model, ViewModel] {
   val name: SceneName                                = SceneName("start scene")
   val modelLens: Lens[Model, SceneModel]             = Lens.keepLatest
   val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.fixed(())
-  val eventFilters: EventFilters                     = EventFilters.Default.withViewModelFilter(_ => None)
+  val eventFilters: EventFilters                     = EventFilters.AllowAll
   val subSystems: Set[SubSystem]                     = Set()
 
   def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
@@ -36,18 +36,20 @@ object StartScene extends Scene[ReferenceData, Model, ViewModel] {
       context: FrameContext[ReferenceData],
       model: SceneModel,
       viewModel: SceneViewModel
-  ): SceneUpdateFragment = {
+  ): Outcome[SceneUpdateFragment] = {
     val horizontalCenter: Int = (Settings.viewportWidth / Settings.magnificationLevel) / 2
     val verticalMiddle: Int   = (Settings.viewportHeight / Settings.magnificationLevel) / 2
 
-    SceneUpdateFragment.empty
-      .addUiLayerNodes(
-        List(
-          Group(bigTitle("Boulders", leftMargin, false, List.empty)),
-          Text("by Simon Miles", horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
-          Text("Click anywhere to play", horizontalCenter, verticalMiddle + 20, 1, GameAssets.fontKey).alignCenter
+    Outcome(
+      SceneUpdateFragment.empty
+        .addUiLayerNodes(
+          List(
+            Group(bigTitle("Boulders", leftMargin, false, List.empty)),
+            Text("by Simon Miles", horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
+            Text("Click anywhere to play", horizontalCenter, verticalMiddle + 20, 1, GameAssets.fontKey).alignCenter
+          )
         )
-      )
+    )
   }
 
   /** Draw the title in big letters, alternating light and dark grey oscillating up and down. */

@@ -16,7 +16,7 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
   val name: SceneName                                = SceneName("play scene")
   val modelLens: Lens[Model, SceneModel]             = Model.playLens
   val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.keepLatest
-  val eventFilters: EventFilters                     = EventFilters.Default
+  val eventFilters: EventFilters                     = EventFilters.AllowAll
   val subSystems: Set[SubSystem]                     = Set()
 
   def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
@@ -59,7 +59,8 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
         case None => Outcome(model).addGlobalEvents(PlaySound(AssetName("rolling"), Volume.Max))
         case Some(solution) =>
           Outcome(model).addGlobalEvents(
-            ModifyEvent[Model, ReplayModel](replayLens, _ => ReplayModel(model, solution, context.gameTime.running)),
+            //ModifyEvent[Model, ReplayModel](replayLens, _ => ReplayModel(model, solution, context.gameTime.running)),
+            ReplayEvent(ReplayModel(model, solution, context.gameTime.running)),
             SceneEvent.JumpTo(ReplayScene.name)
           )
       }
@@ -67,15 +68,16 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
   }
 
   def checkSuccess(outcome: Outcome[PlayModel]): Outcome[PlayModel] =
-    if (outcome.state.status == Won && outcome.state.playerMoves.isEmpty)
+    if (outcome.unsafeGet.status == Won && outcome.unsafeGet.playerMoves.isEmpty)
       outcome.addGlobalEvents(
-        ModifyEvent[Model, Set[Int]](completedLens, _ + outcome.state.maze.number),
+        //ModifyEvent[Model, Set[Int]](completedLens, _ + outcome.unsafeGet.maze.number),
+        SolvedLevel(outcome.unsafeGet.maze.kind, outcome.unsafeGet.maze.number),
         SceneEvent.JumpTo(SuccessScene.name)
       )
     else outcome
 
   def addBoulderRoll(outcome: Outcome[PlayModel]): Outcome[PlayModel] =
-    if (outcome.state.boulderMoves.isEmpty) outcome
+    if (outcome.unsafeGet.boulderMoves.isEmpty) outcome
     else outcome.addGlobalEvents(PlaySound(AssetName("rolling"), Volume.Max))
 
   def updateViewModel(
@@ -97,7 +99,7 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
       context: FrameContext[ReferenceData],
       model: SceneModel,
       viewModel: SceneViewModel
-  ): SceneUpdateFragment = {
+  ): Outcome[SceneUpdateFragment] = {
     val drawControls =
       Group(
         viewModel.playSceneButtons.draw(model.maze.kind) :+
@@ -136,38 +138,40 @@ object PlayScene extends Scene[ReferenceData, Model, ViewModel] {
               )
           case _ => SceneUpdateFragment.empty
         }
-    if (model.tutorial.isEmpty)
-      base
-        .addGameLayerNodes(
-          Text(s"Level ${(model.maze.number + 1)}", horizontalCenter, headerHeight, 1, GameAssets.fontKey).alignCenter
-        )
-    else
-      base
-        .addGameLayerNodes(placeIndicator(model.tutorial.head.indicator, model, context.startUpData.highlight).toList)
-        .addGameLayerNodes(
-          GameAssets.tutorialBox.moveTo(tutorialGuideBoxPosition),
-          Text(
-            model.tutorial.head.text1,
-            tutorialGuideBoxPosition.x + 5,
-            tutorialGuideBoxPosition.y + 10,
-            1,
-            GameAssets.fontKey
-          ),
-          Text(
-            model.tutorial.head.text2,
-            tutorialGuideBoxPosition.x + 5,
-            tutorialGuideBoxPosition.y + 25,
-            1,
-            GameAssets.fontKey
-          ),
-          Text(
-            model.tutorial.head.continue,
-            tutorialGuideBoxPosition.x + 5,
-            tutorialGuideBoxPosition.y + 40,
-            1,
-            GameAssets.fontKey
+    val fragment =
+      if (model.tutorial.isEmpty)
+        base
+          .addGameLayerNodes(
+            Text(s"Level ${model.maze.number + 1}", horizontalCenter, headerHeight, 1, GameAssets.fontKey).alignCenter
           )
-        )
+      else
+        base
+          .addGameLayerNodes(placeIndicator(model.tutorial.head.indicator, model, context.startUpData.highlight).toList)
+          .addGameLayerNodes(
+            GameAssets.tutorialBox.moveTo(tutorialGuideBoxPosition),
+            Text(
+              model.tutorial.head.text1,
+              tutorialGuideBoxPosition.x + 5,
+              tutorialGuideBoxPosition.y + 10,
+              1,
+              GameAssets.fontKey
+            ),
+            Text(
+              model.tutorial.head.text2,
+              tutorialGuideBoxPosition.x + 5,
+              tutorialGuideBoxPosition.y + 25,
+              1,
+              GameAssets.fontKey
+            ),
+            Text(
+              model.tutorial.head.continue,
+              tutorialGuideBoxPosition.x + 5,
+              tutorialGuideBoxPosition.y + 40,
+              1,
+              GameAssets.fontKey
+            )
+          )
+    Outcome(fragment)
   }
 
   // The footer instructions

@@ -11,7 +11,7 @@ object SuccessScene extends Scene[ReferenceData, Model, ViewModel] {
   val name: SceneName                                = SceneName("success scene")
   val modelLens: Lens[Model, SceneModel]             = Lens.keepLatest
   val viewModelLens: Lens[ViewModel, SceneViewModel] = Lens.keepLatest
-  val eventFilters: EventFilters                     = EventFilters.Default
+  val eventFilters: EventFilters                     = EventFilters.AllowAll
   val subSystems: Set[SubSystem]                     = Set.empty
 
   def updateModel(context: FrameContext[ReferenceData], model: SceneModel): GlobalEvent => Outcome[SceneModel] = {
@@ -75,10 +75,12 @@ object SuccessScene extends Scene[ReferenceData, Model, ViewModel] {
       context: FrameContext[ReferenceData],
       model: SceneModel,
       viewModel: SceneViewModel
-  ): SceneUpdateFragment =
-    SceneUpdateFragment.empty
-      .addGameLayerNodes(
-        Text("Success!!", horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
-        Group(viewModel.successSceneButtons.map(_.draw))
-      )
+  ): Outcome[SceneUpdateFragment] =
+    Outcome(
+      SceneUpdateFragment.empty
+        .addGameLayerNodes(
+          Text("Success!!", horizontalCenter, verticalMiddle, 1, GameAssets.fontKey).alignCenter,
+          Group(viewModel.successSceneButtons.map(_.draw))
+        )
+    )
 }
